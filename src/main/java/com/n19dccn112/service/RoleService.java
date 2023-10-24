@@ -1,20 +1,17 @@
-package n19dccn112.service;
+package com.n19dccn112.service;
 
-import com.n19dccn112.model.dto.RateDTO;
 import com.n19dccn112.model.dto.RoleDTO;
-import com.n19dccn112.model.entity.Category;
 import com.n19dccn112.model.entity.Role;
 import com.n19dccn112.repository.RoleRepository;
 import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
-import com.n19dccn112.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
+
 @Service
 public class RoleService implements IBaseService<RoleDTO, Long>, IModelMapper<RoleDTO, Role> {
     private final RoleRepository roleRepository;
@@ -32,17 +29,14 @@ public class RoleService implements IBaseService<RoleDTO, Long>, IModelMapper<Ro
 
     @Override
     public RoleDTO findById(Long roleId) {
-        Optional <Role> role = roleRepository.findById(roleId);
-        role.orElseThrow(() -> new NotFoundException(RateDTO.class, roleId));
-        return createFromE(role.get());
+        return createFromE(roleRepository.findById(roleId).get());
     }
 
     @Override
     public RoleDTO update(Long roleId, RoleDTO roleDTO) {
-        Optional <Role> role = roleRepository.findById(roleId);
-        role.orElseThrow(() -> new NotFoundException(RateDTO.class, roleId));
-        roleRepository.save(updateEntity(role.get(), roleDTO));
-        return createFromE(role.get());
+        Role role = roleRepository.findById(roleId).get();
+        roleRepository.save(updateEntity(role, roleDTO));
+        return roleDTO;
     }
 
     @Override
@@ -53,16 +47,13 @@ public class RoleService implements IBaseService<RoleDTO, Long>, IModelMapper<Ro
 
     @Override
     public RoleDTO delete(Long roleId) {
-        Optional <Role> role = roleRepository.findById(roleId);
-        role.orElseThrow(() -> new NotFoundException(RoleDTO.class, roleId));
-        RoleDTO roleDTO = createFromE(role.get());
+        Role role = roleRepository.findById(roleId).get();
         try {
-            roleRepository.delete(role.get());
+            roleRepository.delete(role);
+        }catch (ConstraintViolationException constraintViolationException){
+            throw new ForeignKeyConstraintViolation(Role.class, roleId);
         }
-        catch (ConstraintViolationException constraintViolationException){
-            throw new ForeignKeyConstraintViolation(Category.class, roleId);
-        }
-        return roleDTO;
+        return createFromE(role);
     }
 
     @Override

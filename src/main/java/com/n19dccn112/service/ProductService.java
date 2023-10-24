@@ -1,192 +1,255 @@
-package n19dccn112.service;
+package com.n19dccn112.service;
 
-import com.n19dccn112.model.dto.FeatureDetailDTO;
 import com.n19dccn112.model.dto.ProductDTO;
+import com.n19dccn112.model.dto.UnitDetailDTO;
 import com.n19dccn112.model.entity.*;
-import com.n19dccn112.model.key.FeatureDetailId;
 import com.n19dccn112.repository.*;
 import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
-import com.n19dccn112.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProductService implements IBaseService<ProductDTO, Long>, IModelMapper<ProductDTO, Product> {
     private final ProductRepository productRepository;
+    private final ImageDetailRepository imageDetailRepository;
     private final ImageRepository imageRepository;
-    private final CategoryRepository categoryRepository;
-    private final FeatureRepository featureRepository;
+    private final CategoryDetailRepository categoryDetailRepository;
+    private final StatusFishDetailRepository statusFishDetailRepository;
     private final FeatureDetailRepository featureDetailRepository;
-    private final FeatureDetailService featureDetailService;
-    private final ImageService imageService;
+    private final CategoryRepository categoryRepository;
+    private final UnitDetailRepository unitDetailRepository;
+    private final UnitRepository unitRepository;
+    private final PondRepository pondRepository;
     private final ModelMapper modelMapper;
 
-    public ProductService(ProductRepository productsRepository, ImageRepository imageRepository, CategoryRepository categoryRepository, FeatureRepository featureRepository, FeatureDetailRepository featureDetailRepository, FeatureDetailService featureDetailService, ImageService imageService, ModelMapper modelMapper) {
-        this.productRepository = productsRepository;
+    public ProductService(ProductRepository productRepository, ImageDetailRepository imageDetailRepository, ImageRepository imageRepository, CategoryDetailRepository categoryDetailRepository, StatusFishDetailRepository statusFishDetailRepository, FeatureDetailRepository featureDetailRepository, CategoryRepository categoryRepository, UnitDetailRepository unitDetailRepository, UnitRepository unitRepository, PondRepository pondRepository, ModelMapper modelMapper) {
+        this.productRepository = productRepository;
+        this.imageDetailRepository = imageDetailRepository;
         this.imageRepository = imageRepository;
-        this.categoryRepository = categoryRepository;
-        this.featureRepository = featureRepository;
+        this.categoryDetailRepository = categoryDetailRepository;
+        this.statusFishDetailRepository = statusFishDetailRepository;
         this.featureDetailRepository = featureDetailRepository;
-        this.featureDetailService = featureDetailService;
-        this.imageService = imageService;
+        this.categoryRepository = categoryRepository;
+        this.unitDetailRepository = unitDetailRepository;
+        this.unitRepository = unitRepository;
+        this.pondRepository = pondRepository;
         this.modelMapper = modelMapper;
     }
 
     @Override
     public List<ProductDTO> findAll() {
-        List<Product> products = productRepository.findAll();
+        return createFromEntities(productRepository.findAll());
+    }
+
+    public List<ProductDTO> findAllByProductIds(List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByProductIds(productIds));
+    }
+
+    public ProductDTO findByProductIdNewSave(String name){
+        return createFromE(productRepository.findById(productRepository.productIdNewSave(name)).get());
+    }
+
+    public List<ProductDTO> findAllByFeatureIds(List<Long> featureIds) {
+        return createFromEntities(productRepository.findAllByFeatureIds(featureIds));
+    }
+
+    public List<ProductDTO> findAllByCategoryId(Long categoryId) {
+        return createFromEntities(productRepository.findAllByCategoryId(categoryId));
+    }
+
+    public List<ProductDTO> findAllByCategoryTypeId(Long categoryTypeId) {
+        return createFromEntities(productRepository.findAllByCategoryTypeId(categoryTypeId));
+    }
+
+    public List<ProductDTO> findAllByEventId(Long eventId) {
+        return createFromEntities(productRepository.findAllByEventId(eventId));
+    }
+
+    public List<ProductDTO> findAllByCategoryIdAndFeatureIds(Long categoryId, List<Long> featureIds) {
+        return createFromEntities(productRepository.findAllByCategoryIdAndFeatureIds(categoryId, featureIds));
+    }
+
+    public List<ProductDTO> findAllByCategoryTypeIdAndFeatureIds(Long categoryTypeId, List<Long> featureIds) {
+        return createFromEntities(productRepository.findAllByCategoryTypeIdAndFeatureIds(categoryTypeId, featureIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryId(Long eventId, Long categoryId) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryId(eventId, categoryId));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryTypeId(Long eventId, Long categoryTypeId) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryTypeId(eventId, categoryTypeId));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndFeatureIds(Long eventId, List<Long> featureIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndFeatureIds(eventId, featureIds));
+    }
+
+    public List<ProductDTO> findAllByFeatureIdsAndProductIds(List<Long> featureIds, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByFeatureIdsAndProductIds(featureIds, productIds));
+    }
+
+    public List<ProductDTO> findAllByCategoryIdAndProductIds(Long categoryId, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByCategoryIdAndProductIds(categoryId, productIds));
+    }
+
+    public List<ProductDTO> findAllByCategoryTypeIdAndProductIds(Long categoryTypeId, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByCategoryTypeIdAndProductIds(categoryTypeId, productIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndProductIds(Long eventId, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndProductIds(eventId, productIds));
+    }
+
+    public List<ProductDTO> findAllByCategoryIdAndFeatureIdsAndProductIds(Long categoryId, List<Long> featureIds, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByCategoryIdAndFeatureIdsAndProductIds(categoryId, featureIds, productIds));
+    }
+
+    public List<ProductDTO> findAllByCategoryTypeIdAndFeatureIdsAndProductIds(Long categoryTypeId, List<Long> featureIds, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByCategoryTypeIdAndFeatureIdsAndProductIds(categoryTypeId, featureIds, productIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryIdAndFeatureIds(Long eventId, Long categoryId, List<Long> featureIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryIdAndFeatureIds(eventId, categoryId, featureIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryTypeIdAndFeatureIds(Long eventId, Long categoryTypeId, List<Long> featureIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryTypeIdAndFeatureIds(eventId, categoryTypeId, featureIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryIdAndProductIds(Long eventId, Long categoryId, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryIdAndProductIds(eventId, categoryId, productIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryTypeIdAndProductIds(Long eventId, Long categoryTypeId, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryTypeIdAndProductIds(eventId, categoryTypeId, productIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndFeatureIdsAndProductIds(Long eventId, List<Long> featureIds, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndFeatureIdsAndProductIds(eventId, featureIds, productIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryIdAndFeatureIdsProductIds(Long eventId, Long categoryId, List<Long> featureIds, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryIdAndFeatureIdsProductIds(eventId, categoryId, featureIds, productIds));
+    }
+
+    public List<ProductDTO> findAllByEventIdAndCategoryTypeIdAndFeatureIdsProductIds(Long eventId, Long categoryTypeId, List<Long> featureIds, List<Long> productIds) {
+        return createFromEntities(productRepository.findAllByEventIdAndCategoryTypeIdAndFeatureIdsProductIds(eventId, categoryTypeId, featureIds, productIds));
+    }
+
+    public List<ProductDTO> findAllByUnitIdDetails(List<Long> unitsIdDetails){
+        List<Product> products = new ArrayList<>();
+        for (Long unitDetailId : unitsIdDetails){
+            products.addAll(productRepository.findAllByUnitIdDetail(unitDetailId));
+        }
         return createFromEntities(products);
-    }
-
-    public List<ProductDTO> findAll(Long categoryId, List<Long> featureIds) {
-        return createFromEntities(productRepository.findAllByFilter(featureIds, categoryId));
-    }
-
-    public List<ProductDTO> findAll(Long categoryId) {
-        return createFromEntities(productRepository.findAllByCategory_CategoryId(categoryId));
-
-    }
-
-    public List<ProductDTO> findAll(List<Long> featureIds) {
-        return createFromEntities(productRepository.findAllByFeaturesID(featureIds));
-    }
-
-    public List<ProductDTO> findAllByListProducts(List<Long> productIds) {
-        return createFromEntities(productRepository.findAllByProductID(productIds));
     }
 
     @Override
     public ProductDTO findById(Long productId) {
-        Optional <Product> products = productRepository.findById(productId);
-        products.orElseThrow(() -> new NotFoundException(ProductDTO.class, productId));
-        return createFromE(products.get());
+        return createFromE(productRepository.findById(productId).get());
     }
+
     @Transactional
     @Override
     public ProductDTO update(Long productId, ProductDTO productDTO) {
-        Optional <Product> product = productRepository.findById(productId);
-        product.orElseThrow(() -> new NotFoundException(ProductDTO.class, productId));
-        productRepository.save(updateEntity(product.get(), productDTO));
-
-        List<Image> images = imageRepository.findAllByProduct_ProductId(productId);
-        for (int i=0; i<productDTO.getImageUrl().size(); i++){
-            if (i<images.size()) {
-                images.get(i).setUrl(productDTO.getImageUrl().get(i));
-                imageRepository.save(images.get(i));
-            }else{
-                Image image = new Image();
-                image.setUrl(productDTO.getImageUrl().get(i));
-                image.setProduct(product.get());
-                imageRepository.save(image);
-            }
+        Product product = productRepository.findById(productId).get();
+        productRepository.save(updateEntity(product, productDTO));
+        for (UnitDetail unitDetail: product.getUnitDetails()) {
+            featureDetailRepository.deleteAllByUnitDetail_UnitDetailId(unitDetail.getUnitDetailId());
+            statusFishDetailRepository.deleteAllByUnitDetail_UnitDetailId(unitDetail.getUnitDetailId());
         }
-        List<FeatureDetail> featureDetails = featureDetailRepository.findAllByFeatureDetailsByProductId(productId);
-        for (int i=0; i<productDTO.getFeatureIds().size(); i++){
-            if (i<featureDetails.size()) {
-                FeatureDetailId featureDetailId = featureDetails.get(i).getFeatureDetailsId();
-                featureDetailId.setProduct(productRepository.findProductByName(productDTO.getName()).get());
-                featureDetails.get(i).setFeatureDetailsId(featureDetailId);
-                featureDetailRepository.save(featureDetails.get(i));
-            }else {
-                FeatureDetailDTO featureDetailDTO = new FeatureDetailDTO();
-                featureDetailDTO.setFeatureId(productDTO.getFeatureIds().get(i));
-                featureDetailDTO.setProductId(productId);
-                featureDetailService.save(featureDetailDTO);
-            }
-        }
-
-        return createFromE(product.get());
+        unitDetailRepository.deleteAllByProduct_ProductId(productId);
+        imageDetailRepository.deleteAllByProduct_ProductId(productId);
+        categoryDetailRepository.deleteAllByProduct_ProductId(productId);
+        return productDTO;
     }
-    @Transactional
+
     @Override
     public ProductDTO save(ProductDTO productDTO) {
-        Product product2 = createFromD(productDTO);
-        product2.setCreateDate(new Date());
-        product2.setCategory(categoryRepository.findById(productDTO.getCategoryId()).get());
-        productRepository.save(product2);
-        Optional<Product> product = productRepository.findProductByName(productDTO.getName());
-        List<Image> images = new ArrayList<>();
-        for (int i = 0; i < productDTO.getImageUrl().size(); i++){
-            Image image = new Image();
-            image.setUrl(productDTO.getImageUrl().get(i));
-            image.setProduct(product.get());
-            imageRepository.save(image);
-            images.add(image);
+        if (productDTO.getIsAnimal().equals("true")) {
+            productDTO.setImportDate(new Date());
         }
-        product.get().setImages(images);
-        productRepository.save(product.get());
-
-        for (Long featureId: productDTO.getFeatureIds()) {
-            FeatureDetailDTO featureDetailDTO = new FeatureDetailDTO();
-            featureDetailDTO.setFeatureId(featureId);
-            featureDetailDTO.setProductId(product.get().getProductId());
-            featureDetailService.save(featureDetailDTO);
-        }
-        return createFromE(product.get());
+        productDTO.setUpdateDateProduct(new Date());
+        productRepository.save(createFromD(productDTO));
+        return productDTO;
     }
 
     @Override
     public ProductDTO delete(Long productId) {
-        Optional <Product> product = productRepository.findById(productId);
-        ProductDTO productDTO = createFromE(product.get());
-        product.orElseThrow(() -> new NotFoundException(ProductDTO.class, productId));
+        Product product = productRepository.findById(productId).get();
         try {
-            productRepository.delete(product.get());
+            productRepository.delete(product);
+        }catch (ConstraintViolationException constraintViolationException){
+            throw new ForeignKeyConstraintViolation(Product.class, productId);
         }
-        catch (ConstraintViolationException constraintViolationException){
-            throw new ForeignKeyConstraintViolation(Category.class, productId);
-        }
-        return productDTO;
+        return createFromE(product);
     }
 
     @Override
     public Product createFromD(ProductDTO productDTO) {
         Product product = modelMapper.map(productDTO, Product.class);
-        List <Image> images = imageRepository.findAllByProduct_ProductId(productDTO.getProductId());
-        product.setImages(images);
         return product;
     }
 
     @Override
     public ProductDTO createFromE(Product product) {
         ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
-        if (product.getImages() != null) {
-            List<String> urlImage = new ArrayList<>();
-            for (Image image : product.getImages()) {
-                urlImage.add(image.getUrl());
+        List<String> categoryNames = new ArrayList<>();
+        for (CategoryDetail categoryDetail: categoryDetailRepository.findAllByProduct_ProductId(productDTO.getProductId())){
+            categoryNames.add(categoryDetail.getCategory().getCategoryName());
+        }
+        productDTO.setCategoryNames(categoryNames);
+
+        List<String> url = new ArrayList<>();
+        for (ImageDetail imageDetail: imageDetailRepository.findAllByProduct_ProductId(productDTO.getProductId())){
+            url.add(imageDetail.getImage().getUrl());
+        }
+        productDTO.setImages(url);
+
+        int amountProduct = 0;
+        int minPrice = -1;
+        int maxPrice = 0;
+        for (UnitDetail unitDetail: unitDetailRepository.findAllByProduct_ProductId(productDTO.getProductId())){
+            if (minPrice == -1 || minPrice > unitDetail.getProductPrice()){
+                minPrice = unitDetail.getProductPrice();
             }
-            productDTO.setImageUrl(urlImage);
+            if (maxPrice < unitDetail.getProductPrice()){
+                maxPrice = unitDetail.getProductPrice();
+            }
+            for (Pond pond: pondRepository.findAllByUnitDetail_UnitDetailId(unitDetail.getUnitDetailId())){
+                amountProduct += pond.getPondAmount() != null ? pond.getPondAmount(): 0;
+            }
         }
-        productDTO.setCategoryId(product.getCategory().getCategoryId());
-        productDTO.setCategoryName(product.getCategory().getCategoryName());
-        List<Long> featureIds = new ArrayList<>();
-        for (Feature feature: featureRepository.findAllByProductId(product.getProductId())){
-            featureIds.add(feature.getFeatureId());
-        }
-        productDTO.setFeatureIds(featureIds);
+        productDTO.setAmountProduct(amountProduct);
+        productDTO.setMinPrice(minPrice == -1 ? 0 : minPrice);
+        productDTO.setMaxPrice(maxPrice);
+
         return productDTO;
     }
 
-    @Transactional
     @Override
     public Product updateEntity(Product product, ProductDTO productDTO) {
         if (product != null && productDTO != null){
-            product.setDescription(productDTO.getDescription());
-            product.setName(productDTO.getName());
-            product.setPrice(productDTO.getPrice());
-            product.setRemain(productDTO.getRemain());
-            product.setUpdateDate(new Date());
-            product.setExpirationDate(productDTO.getExpirationDate());
-            product.setCategory(categoryRepository.getById(productDTO.getCategoryId()));
+            if (productDTO.getProductName() != null) {
+                product.setProductName(productDTO.getProductName());
+            }
+            if (productDTO.getUpdateDateProduct() != null) {
+                product.setUpdateDateProduct(productDTO.getUpdateDateProduct());
+            }
+            if (productDTO.getProductDescription() != null) {
+                product.setProductDescription(productDTO.getProductDescription());
+            }
+            product.setUpdateDateProduct(new Date());
+            if (productDTO.getIsAnimal() != null) {
+                product.setIsAnimal(productDTO.getIsAnimal());
+            }
         }
         return product;
     }

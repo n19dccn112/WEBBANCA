@@ -1,6 +1,5 @@
-package n19dccn112.model.dto;
+package com.n19dccn112.model.dto;
 
-import com.n19dccn112.model.enumeration.RoleNames;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,17 +11,11 @@ import javax.validation.constraints.NotNull;
 @Setter
 public class UserDTO {
     private Long userId;
-    @Email
     private String email;
-    @NotNull
     private String password;
-    @NotNull
-    @NotBlank
     private String username;
-    private String phone;
-    private RoleNames role;
-    private Long userDetailId;
+    private Long roleId;
+    private String roleName;
     private String address;
-    private String name;
-    private int addressDefault;
+    private Long userDetailIdDefault;
 }

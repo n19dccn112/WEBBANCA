@@ -1,57 +1,53 @@
-package n19dccn112.service;
+package com.n19dccn112.service;
 
 import com.n19dccn112.model.Auth.*;
 import com.n19dccn112.model.dto.UserDTO;
-import com.n19dccn112.model.entity.Category;
-import com.n19dccn112.model.entity.Role;
 import com.n19dccn112.model.entity.User;
 import com.n19dccn112.model.entity.UserDetail;
-import com.n19dccn112.model.enumeration.RoleNames;
-import com.n19dccn112.repository.RoleRepository;
-import com.n19dccn112.repository.UserDetailRepository;
-import com.n19dccn112.repository.UserRepository;
+import com.n19dccn112.repository.*;
 import com.n19dccn112.security.jwt.JwtUtils;
 import com.n19dccn112.security.services.UserDetailsImpl;
 import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
-import com.n19dccn112.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IBaseService<UserDTO, Long>, IModelMapper<UserDTO, User> {
     private final UserRepository userRepository;
-    private final UserDetailService userDetailService;
-    private final UserDetailRepository userDetailRepository;
+    private final ProvincesRepository provincesRepository;
+    private final DistrictRepository districtRepository;
+    private final WardRepository wardRepository;
     private final RoleRepository roleRepository;
+    private final UserDetailRepository userDetailRepository;
     private final ModelMapper modelMapper;
-    private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder encoder;
+    private final AuthenticationManager authenticationManager;
 
-    public UserService(UserRepository userRepository, UserDetailService userDetailService, UserDetailRepository userDetailRepository, RoleRepository roleRepository, ModelMapper modelMapper, AuthenticationManager authenticationManager, JwtUtils jwtUtils, PasswordEncoder encoder) {
+    public UserService(UserRepository userRepository, ProvincesRepository provincesRepository, DistrictRepository districtRepository, WardRepository wardRepository, RoleRepository roleRepository, UserDetailRepository userDetailRepository, ModelMapper modelMapper, JwtUtils jwtUtils, PasswordEncoder encoder, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
-        this.userDetailService = userDetailService;
-        this.userDetailRepository = userDetailRepository;
+        this.provincesRepository = provincesRepository;
+        this.districtRepository = districtRepository;
+        this.wardRepository = wardRepository;
         this.roleRepository = roleRepository;
+        this.userDetailRepository = userDetailRepository;
         this.modelMapper = modelMapper;
-        this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.encoder = encoder;
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
@@ -61,103 +57,81 @@ public class UserService implements IBaseService<UserDTO, Long>, IModelMapper<Us
 
     @Override
     public UserDTO findById(Long userId) {
-        Optional <User> user =  userRepository.findById(userId);
-        user.orElseThrow(() -> new NotFoundException(UserDTO.class, userId));
-        return createFromE(user.get());
+        return createFromE(userRepository.findById(userId).get());
     }
-    @Transactional
+
     @Override
     public UserDTO update(Long userId, UserDTO userDTO) {
-        Optional <User> user =  userRepository.findById(userId);
-        user.orElseThrow(() -> new NotFoundException(UserDTO.class, userId));
-        userRepository.save(updateEntity(user.get(), userDTO));
-        UserDetail userDetail = userDetailRepository.findAllByUserUserIdDefault(userId);
-        userDetail.setName(userDTO.getName());
-        userDetail.setAddress(userDTO.getAddress());
-        userDetailRepository.save(userDetail);
-        return createFromE(user.get());
+        User user = userRepository.findById(userId).get();
+        userRepository.save(updateEntity(user, userDTO));
+        return userDTO;
     }
-    @Transactional
+
     @Override
     public UserDTO save(UserDTO userDTO) {
         userRepository.save(createFromD(userDTO));
-        Optional<User> user = userRepository.findUserByUserName(userDTO.getUsername());
-
-        Optional<Role> role = roleRepository.findRoleByRoleName(RoleNames.ROLE_USER.name());
-        role.orElseThrow(() -> new NotFoundException(UserDTO.class, userDTO.getUserId()));
-        user.get().setRole(role.get());
-
-        userRepository.save(user.get());
-        try {
-            UserDetail userDetails1 = userDetailRepository.findAllByUserUserIdDefault(userDTO.getUserId());
-            userDetails1.setAddressDefault(0);
-            userDetailRepository.save(userDetails1);
-        }catch (Exception e){}
-
-        UserDetail userDetails = new UserDetail();
-        userDetails.setUser(user.get());
-        userDetails.setName(userDTO.getName());
-        userDetails.setAddress(userDTO.getAddress());
-        userDetails.setAddressDefault(1);
-        userDetailRepository.save(userDetails);
-
-        return createFromE(user.get());
+        return userDTO;
     }
-    @Transactional
+
     @Override
     public UserDTO delete(Long userId) {
-        Optional <User> user =  userRepository.findById(userId);
-        user.orElseThrow(() -> new NotFoundException(UserDTO.class, userId));
-        UserDTO userDTO = createFromE(user.get());
+        User user = userRepository.findById(userId).get();
         try {
-            userDetailRepository.deleteUserDetailsByUserUserId(userId);
-            userRepository.delete(user.get());
+            userRepository.delete(user);
+        }catch (ConstraintViolationException constraintViolationException){
+            throw new ForeignKeyConstraintViolation(User.class, userId);
         }
-        catch (ConstraintViolationException constraintViolationException){
-            throw new ForeignKeyConstraintViolation(Category.class, userId);
-        }
-        return userDTO;
+        return createFromE(user);
     }
 
     @Override
     public User createFromD(UserDTO userDTO) {
         User user = modelMapper.map(userDTO, User.class);
         user.setPassword(encoder.encode(userDTO.getPassword()));
+        user.setRole(roleRepository.findById(userDTO.getRoleId()).get());
+        try {
+            userDetailRepository.findById(userDTO.getUserDetailIdDefault());
+        }catch (Exception e){
+            user.setUserDetailIdDefault(null);
+        }
         return user;
     }
 
     @Override
     public UserDTO createFromE(User user) {
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
-        if(user.getUserDetails() != null) {
-            for (UserDetail userDetail : user.getUserDetails()) {
-                if (userDetail.getAddressDefault() == 1) {
-                    userDTO.setUserDetailId(userDetail.getUserDetailId());
-                    userDTO.setAddress(userDTO.getAddress());
-                    userDTO.setName(userDTO.getName());
-                    userDTO.setAddressDefault(userDetail.getAddressDefault());
-                    break;
-                }
-            }
-        }
-        if (user.getRole() != null) {
-            userDTO.setRole(user.getRole().getName());
-        }
+        userDTO.setRoleId(user.getRole().getRoleId());
+        userDTO.setRoleName(user.getRole().getName());
         userDTO.setPassword("");
-
-        UserDetail userDetails = userDetailRepository.findAllByUserUserIdDefault(user.getUserId());
-        userDTO.setName(userDetails.getName());
-        userDTO.setAddress(userDetails.getAddress());
+        try {
+            userDetailRepository.findById(user.getUserDetailIdDefault());
+        }catch (Exception e){
+            userDTO.setUserDetailIdDefault(null);
+        }
         return userDTO;
     }
 
     @Override
     public User updateEntity(User user, UserDTO userDTO) {
         if (user != null && userDTO != null){
-            user.setEmail(userDTO.getEmail());
-            user.setPassword(userDTO.getPassword());
-            user.setUsername(userDTO.getUsername());
-            user.setPhone(userDTO.getPhone());
+            if (userDTO.getUsername() != "" && userDTO.getUsername() != null) {
+                user.setUsername(userDTO.getUsername());
+            }
+            if (userDTO.getEmail() != "" && userDTO.getEmail() != null) {
+                user.setEmail(userDTO.getEmail());
+            }
+            if (userDTO.getUserId() != null) {
+                user.setRole(roleRepository.findById(userDTO.getUserId()).get());
+            }
+            if (userDTO.getUserDetailIdDefault() != null) {
+                user.setUserDetailIdDefault(userDTO.getUserDetailIdDefault());
+            }
+            if (userDTO.getRoleId() != null){
+                user.setRole(roleRepository.findById(userDTO.getRoleId()).get());
+            }
+            if (userDTO.getPassword() != null){
+                user.setPassword(encoder.encode(userDTO.getPassword()));
+            }
         }
         return user;
     }
@@ -174,10 +148,7 @@ public class UserService implements IBaseService<UserDTO, Long>, IModelMapper<Us
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
         User user = userRepository.getById(userDetails.getId());
-        List<String> roles = List.of(user.getRole().getName().name());
-        List<String> roles2 = userDetails.getAuthorities().stream()
-                .map(item -> item.getAuthority())
-                .collect(Collectors.toList());
+        List<String> roles = List.of(user.getRole().getName());
         return ResponseEntity.ok(new JwtResponse(jwt,
                 userDetails.getId(),
                 userDetails.getUsername(),
@@ -189,27 +160,48 @@ public class UserService implements IBaseService<UserDTO, Long>, IModelMapper<Us
     }
 
     public ResponseEntity<?> register(RegisterRequest registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+        if (userRepository.existsByUsername(registerRequest.getUsername()) != 0) {
             return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Tên đã tồn tại!"));
         }
-        if (userRepository.existsByEmail(registerRequest.getEmail())){
-            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Email đã tồn tại!"));
+        if (userRepository.existsByPhone(registerRequest.getPhone()) != 0) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Số điện thoại đã tồn tại!"));
         }
         // Create new user's account
         UserDTO userDTO = modelMapper.map(registerRequest, UserDTO.class);
-        userDTO.setRole(registerRequest.getRolename());
+        userDTO.setRoleName(registerRequest.getRoleName());
+        userDTO.setAddress(registerRequest.getAddress());
+        userDTO.setRoleId(2L);
         save(userDTO);
+        Long userId = userRepository.userIdNewSave(userDTO.getUsername());
+        UserDetail userDetail = new UserDetail();
+        userDetail.setUser(userRepository.findById(userId).get());
+        userDetail.setAddress(userDTO.getAddress());
+        userDetail.setName(userDTO.getUsername());
+        userDetail.setPhone(registerRequest.getPhone());
+        userDetail.setWard(wardRepository.findById(registerRequest.getWardId()).get());
+        userDetail.setProvinces(provincesRepository.findById(registerRequest.getProvinceId()).get());
+        userDetail.setDistrict(districtRepository.findById(registerRequest.getDistrictId()).get());
+        userDetailRepository.save(userDetail);
+        User user = userRepository.findById(userId).get();
+        user.setUserDetailIdDefault(userDetailRepository.userDetailIdNewSave(userDTO.getUsername()));
+        userRepository.save(user);
         return new ResponseEntity<>(new MessageResponse("Đăng ký thành công!"), HttpStatus.CREATED);
     }
 
-    public ResponseEntity<?> changePassByEmail(ChangePassByEmailRequest request) {
-        if (!userRepository.existsByEmail(request.getEmail())) {
+    public ResponseEntity<?> changePass(ChangePass request) {
+        if (userRepository.existsByUsername(request.getUsername()) == 0) {
             return ResponseEntity
                     .badRequest()
-                    .body(new MessageResponse("Lỗi: Email không tìm thấy!"));
+                    .body(new MessageResponse("Lỗi: UserName không tìm thấy!"));
         }
-        User user = userRepository.findByEmail(request.getEmail()).get();
-        user.setPassword(encoder.encode(request.getPassword()));
+        User user = userRepository.findAllByUsername(request.getUsername()).get();
+        if (!encoder.matches(request.getOldPassword(), user.getPassword())){
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Lỗi: Password sai!"));
+        }
+        String passEncoder = encoder.encode(request.getPassword());
+        user.setPassword(passEncoder);
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("Thay đổi mật khẩu thành công!"));
     }

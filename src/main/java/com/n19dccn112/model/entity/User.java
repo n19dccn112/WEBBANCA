@@ -1,4 +1,4 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,29 +13,35 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "USERS")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "USER_ID")
     private Long userId;
 
-    @Column(name = "email")
+    @Column(name = "EMAIL")
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "PASSWORD")
     private String password;
 
-    @Column(name = "username")
+    @Column(name = "USERNAME")
     private String username;
 
-    @Column(name = "phone")
-    private String phone;
+    @Column(name = "USERS_DETAIL_ID_DEFAULT")
+    private Long userDetailIdDefault;
 
     @ManyToOne
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "ROLE_ID")
     private Role role;
 
     @OneToMany(mappedBy = "user")
     private List<UserDetail> userDetails;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserProduct> userProducts;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 }

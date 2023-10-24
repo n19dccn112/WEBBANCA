@@ -9,13 +9,16 @@ import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
-public class RateDTO {
+public class UserProductDTO {
+    private Long userProductId;
     private Long productId;
     private Long userId;
-    @NotNull
+    private Long idUserProductReply;
     private String comment;
     @DecimalMin(value = "1")
     @DecimalMax(value = "5")
     private Integer point;
-    private String username;
+    private String isLove;
+    private String isSeen;
+    private String phone;
 }

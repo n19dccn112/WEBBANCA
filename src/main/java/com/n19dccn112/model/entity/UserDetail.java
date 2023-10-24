@@ -1,4 +1,4 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,23 +12,35 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "users_detail")
+@Table(name = "USERS_DETAIL")
 public class UserDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_detail_id")
+    @Column(name = "USER_DETAIL_ID")
     private Long userDetailId;
 
-    @Column(name = "address")
+    @Column(name = "ADDRESS")
     private String address;
 
-    @Column(name = "name")
+    @Column(name = "NAME")
     private String name;
 
-    @Column(name = "address_default")
-    private int addressDefault;
+    @Column(name = "PHONE")
+    private String phone;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "USER_ID")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "DISTRICT_ID")
+    private District district;
+
+    @ManyToOne
+    @JoinColumn(name = "WARD_ID")
+    private Ward ward;
+
+    @ManyToOne
+    @JoinColumn(name = "PROVINCE_ID")
+    private Provinces provinces;
 }

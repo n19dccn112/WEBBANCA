@@ -1,4 +1,4 @@
-package n19dccn112.security.jwt;
+package com.n19dccn112.security.jwt;
 
 import com.n19dccn112.security.services.UserDetailsServiceImpl;
 import org.slf4j.Logger;

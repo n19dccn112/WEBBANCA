@@ -1,4 +1,4 @@
-package n19dccn112.controller;
+package com.n19dccn112.controller;
 
 import com.n19dccn112.controller.Interface.IBaseController;
 import com.n19dccn112.model.dto.ImageDTO;
@@ -21,9 +21,9 @@ public class ImageController implements IBaseController<ImageDTO, Long, ImageSer
 
     @GetMapping("")
     public List<ImageDTO> getAll(@RequestParam(required = false) Long productId) {
-        if (productId != null)
-            return getService().findAll(productId);
-        else
-            return getService().findAll();
+        if (productId != null){
+            return getService().findAllByProductId(productId);
+        }
+        return getService().findAll();
     }
 }

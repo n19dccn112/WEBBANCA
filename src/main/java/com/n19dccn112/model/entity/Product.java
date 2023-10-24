@@ -1,4 +1,4 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
 import lombok.*;
 
@@ -11,41 +11,52 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "product")
+@Table(name = "PRODUCT")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
+    @Column(name = "PRODUCT_ID")
     private Long productId;
 
-    @Column(name = "create_date")
-    private Date createDate;
+    @Column(name = "IMPORT_DATE")
+    private Date importDate;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "PRODUCT_DESCRIPTION")
+    private String productDescription;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "PRODUCT_NAME")
+    private String productName;
 
-    @Column(name = "price")
-    private Integer price;
+    @Column(name = "UPDATE_DATE_PRODUCT")
+    private Date updateDateProduct;
 
-    @Column(name = "remain")
-    private Integer remain;
-
-    @Column(name = "update_date")
-    private Date updateDate;
-
-    @Column(name = "expiration_date")
+    @Column(name = "EXPIRATION_DATE")
     private Date expirationDate;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @Column(name = "IS_ANIMAL")
+    private String isAnimal;
 
-    @OneToMany(mappedBy = "eventProductId.product")
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private List<UnitDetail> unitDetails;
+
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private List<BusinessDetail> businessDetails;
+
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private List<CategoryDetail> categoryDetails;
+
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private List<UserProduct> userProducts;
+
+    @OneToMany
+    @JoinColumn(name = "product_id")
+    private List<ImageDetail> imageDetails;
+
+    @OneToMany
+    @JoinColumn(name = "product_id")
     private List<EventProduct> eventProducts;
-
-    @OneToMany(mappedBy = "product")
-    private List<Image> images;
 }

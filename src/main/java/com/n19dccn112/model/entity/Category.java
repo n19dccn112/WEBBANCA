@@ -1,4 +1,4 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,19 +13,23 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "category")
+@Table(name = "CATEGORY")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
+    @Column(name = "CATEGORY_ID")
     private Long categoryId;
 
-    @Column(name = "category_name")
+    @Column(name = "CATEGORY_NAME")
     private String categoryName;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "CATEGORY_DESCRIPTION")
+    private String categoryDescription;
+
+    @ManyToOne
+    @JoinColumn(name = "CATEGORY_TYPE_ID")
+    private CategoryType categoryType;
 
     @OneToMany(mappedBy = "category")
-    private List<Product> products;
+    private List<CategoryDetail> categoryDetails;
 }

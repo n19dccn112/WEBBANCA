@@ -1,4 +1,4 @@
-package n19dccn112.controller;
+package com.n19dccn112.controller;
 
 import com.n19dccn112.controller.Interface.IBaseController;
 import com.n19dccn112.model.dto.FeatureDTO;
@@ -19,11 +19,10 @@ public class FeatureController implements IBaseController<FeatureDTO, Long, Feat
     @Getter
     private FeatureService service;
     @GetMapping("")
-    public List<FeatureDTO> getAll(@RequestParam(required = false) Long featureType, @RequestParam(required = false) Long productId) {
-        if (featureType != null)
-            return getService().findAll1(featureType);
-        if (productId != null)
-            return getService().findAll(productId);
+    public List<FeatureDTO> getAll(@RequestParam(required = false) Long featureTypeId) {
+        if (featureTypeId != null){
+            return getService().findAllFeatureTypeId(featureTypeId);
+        }
         return getService().findAll();
     }
 }

@@ -1,14 +1,12 @@
-package n19dccn112.controller;
+package com.n19dccn112.controller;
 
 import com.n19dccn112.controller.Interface.IBaseController;
+import com.n19dccn112.model.dto.UserDTO;
 import com.n19dccn112.model.dto.UserDetailDTO;
 import com.n19dccn112.service.UserDetailService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Getter;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -23,7 +21,14 @@ public class UserDetailController implements IBaseController<UserDetailDTO, Long
     private UserDetailService service;
 
     @GetMapping("")
-    public List<UserDetailDTO> getAll() {
+    public List<UserDetailDTO> getAll(@RequestParam(required = false) Long userId) {
+        if (userId != null){
+            return getService().findAllByUserId(userId);
+        }
         return getService().findAll();
+    }
+    @GetMapping("/name/{name}")
+    public UserDetailDTO get1Name(@PathVariable String name) {
+        return getService().findByUserDetailIdNewSave(name);
     }
 }

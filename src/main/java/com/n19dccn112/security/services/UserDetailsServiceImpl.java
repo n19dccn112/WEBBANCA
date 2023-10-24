@@ -1,4 +1,4 @@
-package n19dccn112.security.services;
+package com.n19dccn112.security.services;
 
 import com.n19dccn112.model.entity.User;
 import com.n19dccn112.repository.UserRepository;

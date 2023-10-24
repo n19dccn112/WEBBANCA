@@ -1,6 +1,5 @@
-package n19dccn112.model.dto;
+package com.n19dccn112.model.dto;
 
-import com.n19dccn112.model.enumeration.EventStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,14 +16,13 @@ public class EventDTO {
     @NotNull
     @NotBlank
     private String eventName;
-    private String description;
+    private String eventDescription;
     private Date startDate;
     private Date endDate;
-    @NotNull
-    @NotBlank
     private String discountCode;
     @DecimalMin(value = "0")
     @DecimalMax(value = "100")
     private int discountValue;
-    private EventStatus eventStatus;
+    private Long eventStatusId;
+    private String isShow;
 }

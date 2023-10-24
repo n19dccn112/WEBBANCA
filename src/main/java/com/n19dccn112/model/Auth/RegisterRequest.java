@@ -1,6 +1,4 @@
-package n19dccn112.model.Auth;
-
-import com.n19dccn112.model.enumeration.RoleNames;
+package com.n19dccn112.model.Auth;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,12 +14,15 @@ public class RegisterRequest {
     @Size(min = 3, max = 20)
     private String username;
     private String address;
+    private Integer provinceId;
+    private Integer districtId;
+    private Integer wardId;
     @NotBlank
     @Size(min = 10, max = 10)
     private String phone;
     @Email
     private String email;
-    private RoleNames rolename;
+    private String roleName;
     @NotBlank
     @Size(min = 6, max = 40)
     private String password;

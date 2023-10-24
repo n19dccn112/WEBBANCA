@@ -1,4 +1,4 @@
-package n19dccn112.controller;
+package com.n19dccn112.controller;
 
 import com.n19dccn112.controller.Interface.IBaseController;
 import com.n19dccn112.model.dto.CategoryDTO;
@@ -20,7 +20,10 @@ public class CategoryController implements IBaseController<CategoryDTO, Long, Ca
     private CategoryService service;
 
     @GetMapping("")
-    public List<CategoryDTO> getAll() {
+    public List<CategoryDTO> getAll(@RequestParam(required = false) Long categoryTypeId) {
+        if (categoryTypeId != null){
+            return getService().findAllCategoryTypeId(categoryTypeId);
+        }
         return getService().findAll();
     }
 }

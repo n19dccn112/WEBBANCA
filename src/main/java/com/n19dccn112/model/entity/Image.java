@@ -1,4 +1,4 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,23 +6,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "image")
+@Table(name = "IMAGE")
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id")
+    @Column(name = "IMAGE_ID")
     private Long imageId;
 
-    @Column(name = "url")
+    @Column(name = "URL")
     private String url;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @OneToMany(mappedBy = "image")
+    private List<ImageDetail> imageDetails;
 }

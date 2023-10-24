@@ -1,107 +1,101 @@
-package n19dccn112.service;
+package com.n19dccn112.service;
 
 import com.n19dccn112.model.dto.EventProductDTO;
-import com.n19dccn112.model.entity.Event;
 import com.n19dccn112.model.entity.EventProduct;
-import com.n19dccn112.model.entity.Product;
-import com.n19dccn112.model.key.EventProductId;
 import com.n19dccn112.repository.EventProductRepository;
 import com.n19dccn112.repository.EventRepository;
 import com.n19dccn112.repository.ProductRepository;
+import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
-import com.n19dccn112.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolationException;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 @Service
-public class EventProductService implements IModelMapper<EventProductDTO, EventProduct> {
-    private final EventProductRepository eventProductRepository;
-    private final ModelMapper modelMapper;
+public class EventProductService implements IBaseService<EventProductDTO, Long>, IModelMapper<EventProductDTO, EventProduct> {
     private final EventRepository eventRepository;
     private final ProductRepository productRepository;
+    private final EventProductRepository eventProductRepository;
+    private final ModelMapper modelMapper;
 
-    public EventProductService(EventProductRepository eventProductRepository, ModelMapper modelMapper, EventRepository eventRepository, ProductRepository productRepository) {
-        this.eventProductRepository = eventProductRepository;
-        this.modelMapper = modelMapper;
+    public EventProductService(EventRepository eventRepository, ProductRepository productRepository, EventProductRepository eventProductRepository, ModelMapper modelMapper) {
         this.eventRepository = eventRepository;
         this.productRepository = productRepository;
+        this.eventProductRepository = eventProductRepository;
+        this.modelMapper = modelMapper;
     }
 
+    @Override
     public List<EventProductDTO> findAll() {
         return createFromEntities(eventProductRepository.findAll());
     }
 
-    public List<EventProductDTO> findAll(Long eventId) {
-        return createFromEntities(eventProductRepository.findAllByEventProductId_Event(eventId));
+    public List<EventProductDTO> findAllProductId(Long productId) {
+        return createFromEntities(eventProductRepository.findAllByProduct_ProductId(productId));
     }
 
-    public EventProductId eventProductId(Event event, Product product){
-        EventProductId eventProductId = new EventProductId();
-        eventProductId.setEvent(event);
-        eventProductId.setProduct(product);
-        return eventProductId;
+    public List<EventProductDTO> findAllEventId(Long eventId) {
+        return createFromEntities(eventProductRepository.findAllByEvent_EventId(eventId));
     }
 
-    public EventProductDTO findById(Long eventId, Long productId) {
-        EventProductId eventProductId = eventProductId(eventRepository.findById(eventId).get(),productRepository.findById(productId).get());
-        Optional <EventProduct> eventProduct = eventProductRepository.findById(eventProductId);
-        eventProduct.orElseThrow(() -> new NotFoundException(eventProductId));
-        return createFromE(eventProduct.get());
+    public List<EventProductDTO> findAllEventIdAndProductId(Long eventId, Long productId) {
+        return createFromEntities(eventProductRepository.findAllByEvent_EventIdAndProduct_ProductId(eventId, productId));
     }
 
-    public EventProductDTO update(Long eventId, Long productId, EventProductDTO eventProductDTO) {
-        EventProductId eventProductId = eventProductId(eventRepository.findById(eventId).get(),productRepository.findById(productId).get());
-        Optional <EventProduct> eventProduct = eventProductRepository.findById(eventProductId);
-        eventProduct.orElseThrow(() -> new NotFoundException(eventProductId));
-        eventProductRepository.save(updateEntity(eventProduct.get(), eventProductDTO));
-        return createFromE(eventProduct.get());
+    @Override
+    public EventProductDTO findById(Long eventProductId) {
+        return createFromE(eventProductRepository.findById(eventProductId).get());
     }
 
+    @Override
+    public EventProductDTO update(Long eventProductId, EventProductDTO eventProductDTO) {
+        EventProduct eventProduct = eventProductRepository.findById(eventProductId).get();
+        eventProductRepository.save(updateEntity(eventProduct, eventProductDTO));
+        return eventProductDTO;
+    }
+
+    @Override
     public EventProductDTO save(EventProductDTO eventProductDTO) {
-        EventProduct eventProduct = createFromD(eventProductDTO);
-        eventProduct.setCreateDate(new Date());
-        eventProduct.setUpdateDate(new Date());
-        eventProductRepository.save(eventProduct);
-        return createFromE(eventProduct);
+        eventProductRepository.save(createFromD(eventProductDTO));
+        return eventProductDTO;
     }
 
-    public EventProductDTO delete(Long eventId, Long productId) {
-        EventProductId eventProductId = eventProductId(eventRepository.findById(eventId).get(),productRepository.findById(productId).get());
-        Optional <EventProduct> eventProduct = eventProductRepository.findById(eventProductId);
-        eventProduct.orElseThrow(() -> new NotFoundException(eventProductId));
+    @Override
+    public EventProductDTO delete(Long eventProductId) {
+        EventProduct eventProduct = eventProductRepository.findById(eventProductId).get();
         try {
-            eventProductRepository.delete(eventProduct.get());
+            eventProductRepository.delete(eventProduct);
         }catch (ConstraintViolationException constraintViolationException){
-            throw new ForeignKeyConstraintViolation(EventProductDTO.class, eventProductId);
+            throw new ForeignKeyConstraintViolation(EventProduct.class, eventProductId);
         }
-        return createFromE(eventProduct.get());
+        return createFromE(eventProduct);
     }
 
     @Override
     public EventProduct createFromD(EventProductDTO eventProductDTO) {
         EventProduct eventProduct = modelMapper.map(eventProductDTO, EventProduct.class);
-        eventProduct.setEventProductId(eventProductId(eventRepository.findById(eventProductDTO.getEventId()).get(),productRepository.findById(eventProductDTO.getProductId()).get()));
+        eventProduct.setProduct(productRepository.findById(eventProductDTO.getProductId()).get());
+        eventProduct.setEvent(eventRepository.findById(eventProductDTO.getEventId()).get());
         return eventProduct;
     }
 
     @Override
     public EventProductDTO createFromE(EventProduct eventProduct) {
         EventProductDTO eventProductDTO = modelMapper.map(eventProduct, EventProductDTO.class);
-        eventProductDTO.setEventId(eventProduct.getEventProductId().getEvent().getEventId());
-        eventProductDTO.setProductId(eventProduct.getEventProductId().getProduct().getProductId());
+        eventProductDTO.setEventId(eventProductDTO.getEventId());
+        eventProductDTO.setProductId(eventProductDTO.getProductId());
         return eventProductDTO;
     }
 
     @Override
     public EventProduct updateEntity(EventProduct eventProduct, EventProductDTO eventProductDTO) {
         if (eventProduct != null && eventProductDTO != null){
-            eventProduct.setEventProductId(eventProductId(eventRepository.findById(eventProductDTO.getEventId()).get(),productRepository.findById(eventProductDTO.getProductId()).get()));
-            eventProduct.setUpdateDate(new Date());
+            eventProduct.setProduct(productRepository.findById(eventProductDTO.getProductId()).get());
+            eventProduct.setEvent(eventRepository.findById(eventProductDTO.getEventId()).get());
+            eventProduct.setUpdateDate(eventProductDTO.getUpdateDate());
+            eventProduct.setCreateDate(eventProductDTO.getCreateDate());
         }
         return eventProduct;
     }

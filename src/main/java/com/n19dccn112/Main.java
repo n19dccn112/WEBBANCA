@@ -1,4 +1,4 @@
-package n19dccn112;
+package com.n19dccn112;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -28,7 +28,7 @@ Với @OpenAPIDefinition, đây là một annotation để xác định API củ
  */
 @OpenAPIDefinition(
         info = @Info(
-                title = "Web API Vật Tư",
+                title = "Web API BÁN CÁ",
                 description = "N19DCCN112",
                 contact = @Contact(
                         name = "",

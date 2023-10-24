@@ -1,4 +1,4 @@
-package n19dccn112.model.dto;
+package com.n19dccn112.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,12 +11,15 @@ import java.util.Map;
 @Setter
 public class OrderDTO {
     private Long orderId;
-    private String address;
+    private String orderAddress;
     @Size(min = 10, max = 10)
-    private String phone;
-    private String status;
-    private Date time;
+    private String orderPhone;
+    private Date orderTimeStart;
+    private Date orderTimeEnd;
+    private Integer paymentAmount;
+    private Date paymentDate;
     private Long userId;
-    private String name;
-    private Map<Long, Integer> details;
+    private Long paymentMethodId;
+    private Long orderStatusId;
+    private Map<Long, Integer> reAmounts;
 }

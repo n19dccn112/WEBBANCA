@@ -1,6 +1,4 @@
-package n19dccn112.model.entity;
-
-import com.n19dccn112.model.key.FeatureDetailId;
+package com.n19dccn112.model.entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +11,21 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "feature_detail")
+@Table(name = "FEATURE_DETAIL")
 public class FeatureDetail {
-    @EmbeddedId
-    private FeatureDetailId featureDetailsId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "FEATURE_DETAIL_ID")
+    private Long featureDetailId;
+
+    @Column(name = "FEATURE_PRICE")
+    private Integer featurePrice;
+
+    @ManyToOne
+    @JoinColumn(name = "FEATURE_ID")
+    private Feature feature;
+
+    @ManyToOne
+    @JoinColumn(name = "UNIT_DETAIL_ID")
+    private UnitDetail unitDetail;
 }

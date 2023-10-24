@@ -1,4 +1,4 @@
-package n19dccn112.controller;
+package com.n19dccn112.controller;
 
 import com.n19dccn112.controller.Interface.IBaseController;
 import com.n19dccn112.model.dto.FeatureTypeDTO;

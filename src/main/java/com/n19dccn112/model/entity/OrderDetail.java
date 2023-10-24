@@ -1,6 +1,5 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
-import com.n19dccn112.model.key.OrderDetailId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +12,21 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "order_detail")
+@Table(name = "ORDER_DETAIL")
 public class OrderDetail {
-    @EmbeddedId
-    private OrderDetailId orderDetailId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ORDER_DETAIL_ID")
+    private Long orderDetailId;
 
-    @Column(name = "amount")
+    @Column(name = "AMOUNT")
     private int amount;
+
+    @ManyToOne
+    @JoinColumn(name = "ORDER_ID")
+    private Order order;
+
+    @ManyToOne
+    @JoinColumn(name = "UNIT_DETAIL_ID")
+    private UnitDetail unitDetail;
 }

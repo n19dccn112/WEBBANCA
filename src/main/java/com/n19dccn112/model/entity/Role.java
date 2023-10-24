@@ -1,6 +1,5 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
-import com.n19dccn112.model.enumeration.RoleNames;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,16 +13,15 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "role")
+@Table(name = "ROLE")
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
+    @Column(name = "ROLE_ID")
     private Long roleId;
 
-    @Column(name = "name")
-    @Enumerated(EnumType.STRING)
-    private RoleNames name;
+    @Column(name = "ROLE_NAME")
+    private String name;
 
     @OneToMany(mappedBy = "role")
     private List<User> users;

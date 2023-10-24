@@ -1,6 +1,6 @@
-package n19dccn112.controller.Auth;
+package com.n19dccn112.controller.Auth;
 
-import com.n19dccn112.model.Auth.ChangePassByEmailRequest;
+import com.n19dccn112.model.Auth.ChangePass;
 import com.n19dccn112.model.Auth.JwtResponse;
 import com.n19dccn112.model.Auth.LoginRequest;
 import com.n19dccn112.model.Auth.RegisterRequest;
@@ -31,8 +31,8 @@ public class AuthController {
         return userService.register(signUpRequest);
     }
 
-    @PostMapping("/changePassByEmail")
-    public ResponseEntity<?> changePassByEmail(@Valid @RequestBody ChangePassByEmailRequest signUpRequest) {
-        return userService.changePassByEmail(signUpRequest);
+    @PostMapping("/changePass")
+    public ResponseEntity<?> changePassByEmail(@Valid @RequestBody ChangePass signUpRequest) {
+        return userService.changePass(signUpRequest);
     }
 }

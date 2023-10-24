@@ -1,4 +1,4 @@
-package n19dccn112.security.services;
+package com.n19dccn112.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.n19dccn112.model.entity.User;
@@ -48,18 +48,18 @@ public class UserDetailsImpl implements UserDetails {
 
     public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(user.getRole().getName().name()));
+        authorities.add(new SimpleGrantedAuthority(user.getRole().getName()));
         UserDetail userDetail = new UserDetail();
         if(user.getUserDetails() != null) {
             for (UserDetail u : user.getUserDetails()) {
-                if (u.getAddressDefault() == 1) {
+                if (u.getUserDetailId() == user.getUserDetailIdDefault()) {
                     userDetail = u;
                     break;
                 }
             }
         }
         return new UserDetailsImpl(
-                user.getUserId(), user.getUsername(), user.getEmail(), user.getPhone(), userDetail.getName(), userDetail.getAddress(), user.getPassword(), authorities);
+                user.getUserId(), user.getUsername(), user.getEmail(), userDetail.getPhone(), userDetail.getName(), userDetail.getAddress(), user.getPassword(), authorities);
     }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

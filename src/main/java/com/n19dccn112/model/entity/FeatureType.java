@@ -1,4 +1,4 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,19 +13,22 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "feature_type")
+@Table(name = "FEATURE_TYPE")
 public class FeatureType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "feature_type_id")
+    @Column(name = "FEARTURE_TYPE_ID")
     private Long featureTypeId;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "FEATURE_TYPE_NAME")
+    private String featureTypeName;
 
-    @Column(name = "unit")
-    private String unit;
+    @Column(name = "FEATURE_TYPE_UNIT")
+    private String featureTypeUnit;
 
-    @OneToMany(mappedBy = "featuretype")
+    @Column(name = "IS_SHOW_FEATURE")
+    private String isShow;
+
+    @OneToMany(mappedBy = "featureType")
     private List<Feature> features;
 }

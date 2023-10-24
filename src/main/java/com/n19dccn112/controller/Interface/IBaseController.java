@@ -1,4 +1,4 @@
-package n19dccn112.controller.Interface;
+package com.n19dccn112.controller.Interface;
 
 import com.n19dccn112.service.Interface.IBaseService;
 import org.springframework.http.HttpStatus;

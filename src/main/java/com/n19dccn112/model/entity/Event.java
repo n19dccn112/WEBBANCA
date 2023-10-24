@@ -1,6 +1,5 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
-import com.n19dccn112.model.enumeration.EventStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,34 +14,38 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "event")
+@Table(name = "EVENT")
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "event_id")
+    @Column(name = "EVENT_ID")
     private Long eventId;
 
-    @Column(name = "event_name")
+    @Column(name = "EVENT_NAME")
     private String eventName;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "EVENT_DESCRIPTION")
+    private String eventDescription;
 
-    @Column(name = "start_date")
+    @Column(name = "START_DATE")
     private Date startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "END_DATE")
     private Date endDate;
 
-    @Column(name = "discount_code")
+    @Column(name = "DISCOUNT_CODE")
     private String discountCode;
 
-    @Column(name = "discount_value")
+    @Column(name = "DISCOUNT_VALUE")
     private int discountValue;
 
-    @Column(name = "event_status")
-    private EventStatus eventStatus;
+    @Column(name = "IS_SHOW_EVENT")
+    private String isShow;
 
-    @OneToMany(mappedBy = "eventProductId.event")
+    @OneToMany(mappedBy = "event")
     private List<EventProduct> eventProducts;
+
+    @ManyToOne
+    @JoinColumn(name = "EVENT_STATUS_ID")
+    private EventStatus eventStatus;
 }

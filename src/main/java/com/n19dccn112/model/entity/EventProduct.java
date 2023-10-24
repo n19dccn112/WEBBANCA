@@ -1,15 +1,11 @@
-package n19dccn112.model.entity;
+package com.n19dccn112.model.entity;
 
-import com.n19dccn112.model.key.EventProductId;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -17,14 +13,24 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "event_product", schema = "dbo")
+@Table(name = "EVENT_PRODUCT", schema = "dbo")
 public class EventProduct {
-    @EmbeddedId
-    private EventProductId eventProductId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "EVENT_PRODUCT_ID")
+    private Long eventProductId;
 
-    @Column(name = "create_date")
+    @Column(name = "CREATE_DATE")
     private Date createDate;
 
-    @Column(name = "update_date")
+    @Column(name = "UPDATE_DATE")
     private Date updateDate;
+
+    @ManyToOne
+    @JoinColumn(name = "EVENT_ID")
+    private Event event;
+
+    @ManyToOne
+    @JoinColumn(name = "PRODUCT_ID")
+    private Product product;
 }

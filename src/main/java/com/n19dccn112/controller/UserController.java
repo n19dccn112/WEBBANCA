@@ -1,4 +1,4 @@
-package n19dccn112.controller;
+package com.n19dccn112.controller;
 
 import com.n19dccn112.controller.Interface.IBaseController;
 import com.n19dccn112.model.dto.UserDTO;
@@ -20,7 +20,7 @@ public class UserController implements IBaseController<UserDTO, Long, UserServic
     private UserService service;
 
     @GetMapping("")
-    public List<UserDTO> getAll() {
+    public List<UserDTO> getAll(){
         return getService().findAll();
     }
 }

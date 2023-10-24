@@ -1,26 +1,28 @@
-package n19dccn112.service;
+package com.n19dccn112.service;
 
 import com.n19dccn112.model.dto.EventDTO;
 import com.n19dccn112.model.entity.Event;
-import com.n19dccn112.model.enumeration.EventStatus;
 import com.n19dccn112.repository.EventRepository;
+import com.n19dccn112.repository.EventStatusRepository;
 import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
-import com.n19dccn112.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Constraint;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
+
 @Service
 public class EventService implements IBaseService<EventDTO, Long>, IModelMapper<EventDTO, Event> {
     private final EventRepository eventRepository;
+    private final EventStatusRepository eventStatusRepository;
     private final ModelMapper modelMapper;
 
-    public EventService(EventRepository eventRepository, ModelMapper modelMapper) {
+    public EventService(EventRepository eventRepository, EventStatusRepository eventStatusRepository, ModelMapper modelMapper) {
         this.eventRepository = eventRepository;
+        this.eventStatusRepository = eventStatusRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -29,63 +31,65 @@ public class EventService implements IBaseService<EventDTO, Long>, IModelMapper<
         return createFromEntities(eventRepository.findAll());
     }
 
+    public List<EventDTO> findAllEventStatusId(Long eventStatusId) {
+        return createFromEntities(eventRepository.findAllByEventStatus_EventStatusId(eventStatusId));
+    }
+
     @Override
     public EventDTO findById(Long eventId) {
-        return createFromE(eventRepository.getById(eventId));
+        return createFromE(eventRepository.findById(eventId).get());
     }
 
     @Override
     public EventDTO update(Long eventId, EventDTO eventDTO) {
-        Optional <Event> event = eventRepository.findById(eventId);
-        event.orElseThrow(() -> new NotFoundException(EventDTO.class, eventId));
-        eventRepository.save(updateEntity(event.get(), eventDTO));
-        return createFromE(event.get());
-    }
-
-    @Override
-    public EventDTO save(EventDTO eventDTO) {
-        Event event = createFromD(eventDTO);
-        event.setEventStatus(EventStatus.ACTICATED);
-        eventRepository.save(event);
-        return createFromE(event);
-    }
-
-    @Override
-    public EventDTO delete(Long eventId) {
-        Optional <Event> event = eventRepository.findById(eventId);
-        event.orElseThrow(() -> new NotFoundException(EventDTO.class, eventId));
-        EventDTO eventDTO = createFromE(event.get());
-        try {
-            eventRepository.delete(event.get());
-        }catch (ConstraintViolationException constraintViolationException){
-            throw new ForeignKeyConstraintViolation(EventDTO.class, eventId);
-        }
+        Event event = eventRepository.findById(eventId).get();
+        eventRepository.save(updateEntity(event, eventDTO));
         return eventDTO;
     }
 
     @Override
+    public EventDTO save(EventDTO eventDTO) {
+        eventRepository.save(createFromD(eventDTO));
+        return eventDTO;
+    }
+
+    @Override
+    public EventDTO delete(Long eventId) {
+        Event event = eventRepository.findById(eventId).get();
+        try {
+            eventRepository.delete(event);
+        }catch (ConstraintViolationException constraintViolationException){
+            throw new ForeignKeyConstraintViolation(Event.class, eventId);
+        }
+        return createFromE(event);
+    }
+
+    @Override
     public Event createFromD(EventDTO eventDTO) {
-        Event event = modelMapper.map(eventDTO, Event.class);
+        Event event= modelMapper.map(eventDTO, Event.class);
+        event.setEventStatus(eventStatusRepository.findById(eventDTO.getEventId()).get());
         return event;
     }
 
     @Override
     public EventDTO createFromE(Event event) {
         EventDTO eventDTO = modelMapper.map(event, EventDTO.class);
+        eventDTO.setEventStatusId(event.getEventStatus().getEventStatusId());
         return eventDTO;
     }
 
     @Override
     public Event updateEntity(Event event, EventDTO eventDTO) {
         if (event != null && eventDTO != null){
-            event.setEventName(eventDTO.getEventName());
-            event.setDescription(eventDTO.getDescription());
-            event.setStartDate(eventDTO.getStartDate());
             event.setEndDate(eventDTO.getEndDate());
+            event.setStartDate(eventDTO.getStartDate());
             event.setDiscountCode(eventDTO.getDiscountCode());
+            event.setEventName(eventDTO.getEventName());
+            event.setEventDescription(eventDTO.getEventDescription());
+            event.setEventStatus(eventStatusRepository.findById(eventDTO.getEventId()).get());
             event.setDiscountValue(eventDTO.getDiscountValue());
-            event.setEventStatus(eventDTO.getEventStatus());
+            event.setIsShow(eventDTO.getIsShow());
         }
-        return event;
+        return null;
     }
 }

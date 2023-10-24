@@ -1,4 +1,4 @@
-package n19dccn112.security;
+package com.n19dccn112.security;
 
 import com.n19dccn112.security.jwt.JwtAuthEntryPoint;
 import com.n19dccn112.security.jwt.JwtAuthTokenFilter;
@@ -69,59 +69,122 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers(
+                .antMatchers(HttpMethod.POST,
                         "/api/auth/**",
                         "/api/v1/public**",
                         "/swagger-ui**",
                         "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/api/auth/**")
+                        "/v3/api-docs/**")
                 .permitAll()
                 .antMatchers(HttpMethod.GET,
+                        "/api/v1/public**",
+                        "/swagger-ui**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/api/categoryDetail**",
+                        "/api/categoryDetail/**",
                         "/api/categories**",
                         "/api/categories/**",
+                        "/api/categoryTypes**",
+                        "/api/categoryTypes/**",
                         "/api/images**",
                         "/api/images/**",
-                        "/api/rates**",
-                        "/api/rates/**",
+                        "/api/imagesDetail**",
+                        "/api/imagesDetail/**",
+                        "/api/userProducts**",
+                        "/api/userProducts/**",
                         "/api/features**",
                         "/api/features/**",
                         "/api/featureTypes**",
                         "/api/featureTypes/**",
+                        "/api/featureDetails**",
+                        "/api/featureDetails/**",
+                        "/api/unitDetail/**",
+                        "/api/unitDetail**",
+                        "/api/unit/**",
+                        "/api/unit**",
+                        "/api/ponds/**",
+                        "/api/ponds**",
                         "/api/products/**",
                         "/api/products**",
+                        "/api/statusFish/**",
+                        "/api/statusFish**",
                         "/api/events/**",
                         "/api/events**",
+                        "/api/eventStatus/**",
+                        "/api/eventStatus**",
                         "/api/users/**",
                         "/api/users**",
                         "/api/userDetails/**",
-                        "/api/userDetails**")
+                        "/api/userDetails**",
+                        "/api/business**",
+                        "/api/business/**",
+                        "/api/businessDetail**",
+                        "/api/businessDetail/**",
+                        "/api/fqa**",
+                        "/api/fqa/**",
+                        "/api/reply**",
+                        "/api/reply/**",
+                        "/api/districts/**",
+                        "/api/districts**",
+                        "/api/provinces/**",
+                        "/api/provinces**",
+                        "/api/wards/**",
+                        "/api/wards**")
                 .permitAll()
                 .antMatchers(
+                        "/api/paymentMethod/**",
+                        "/api/paymentMethod**",
+                        "/api/orderStatus/**",
+                        "/api/orderStatus**",
                         "/api/orders/**",
-                        "/api/orders**"
-                )
-                .hasAnyRole("SHOP", "USER")
-                .antMatchers(
+                        "/api/orders**",
+                        "/api/paymentMethod**",
+                        "/api/paymentMethod/**",
+                        "/api/users/**",
+                        "/api/users**",
+                        "/api/userDetails/**",
+                        "/api/userDetails**",
+                        "/api/business**",
+                        "/api/business/**",
+                        "/api/businessDetail**",
+                        "/api/businessDetail/**",
+                        "/api/fqa**",
+                        "/api/fqa/**",
+                        "/api/reply**",
+                        "/api/reply/**",
+                        "/api/categoryDetails**",
+                        "/api/categoryDetails/**",
                         "/api/categories**",
                         "/api/categories/**",
+                        "/api/categoryTypes**",
+                        "/api/categoryTypes/**",
                         "/api/images**",
                         "/api/images/**",
-                        "/api/users**",
-                        "/api/users/**",
-                        "/api/userDetails**",
-                        "/api/userDetails/**",
+                        "/api/imagesDetail**",
+                        "/api/imagesDetail/**",
+                        "/api/userProducts**",
+                        "/api/userProducts/**",
                         "/api/features**",
                         "/api/features/**",
                         "/api/featureTypes**",
                         "/api/featureTypes/**",
+                        "/api/featureDetails**",
+                        "/api/featureDetails/**",
+                        "/api/unitDetail/**",
+                        "/api/unitDetail**",
+                        "/api/unit/**",
+                        "/api/unit**",
                         "/api/products/**",
-                        "/api/products**")
-                .hasRole("SHOP")
-                .antMatchers("/api/rates**",
-                        "/api/rates/**"
-                        )
-                .hasRole("USER")
+                        "/api/products**",
+                        "/api/statusFish/**",
+                        "/api/statusFish**",
+                        "/api/events/**",
+                        "/api/events**",
+                        "/api/eventStatus/**",
+                        "/api/eventStatus**"
+                )
+                .hasAnyRole("SHOP", "USER")
 
                 .anyRequest().authenticated();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

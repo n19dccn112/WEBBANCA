@@ -1,105 +1,99 @@
-package n19dccn112.service;
+package com.n19dccn112.service;
 
 import com.n19dccn112.model.dto.OrderDetailDTO;
+import com.n19dccn112.model.entity.Order;
 import com.n19dccn112.model.entity.OrderDetail;
-import com.n19dccn112.model.key.OrderDetailId;
-import com.n19dccn112.repository.OrderDetailRepository;
-import com.n19dccn112.repository.OrderRepository;
-import com.n19dccn112.repository.ProductRepository;
+import com.n19dccn112.model.entity.Pond;
+import com.n19dccn112.repository.*;
+import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
-import com.n19dccn112.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
 @Service
-public class OrderDetailService implements IModelMapper<OrderDetailDTO, OrderDetail> {
-    private final OrderDetailRepository orderDetailRepository;
+public class OrderDetailService implements IBaseService<OrderDetailDTO, Long>, IModelMapper<OrderDetailDTO, OrderDetail> {
     private final OrderRepository orderRepository;
-    private final ProductRepository productRepository;
+    private final UnitDetailRepository unitDetailRepository;
+    private final OrderDetailRepository orderDetailRepository;
     private final ModelMapper modelMapper;
+    private final PondRepository pondRepository;
 
-    public OrderDetailService(OrderDetailRepository orderDetailRepository, OrderRepository orderRepository, ProductRepository productRepository, ModelMapper modelMapper) {
-        this.orderDetailRepository = orderDetailRepository;
+    public OrderDetailService(OrderRepository orderRepository, UnitDetailRepository unitDetailRepository, OrderDetailRepository orderDetailRepository, ModelMapper modelMapper, PondRepository pondRepository) {
         this.orderRepository = orderRepository;
-        this.productRepository = productRepository;
+        this.unitDetailRepository = unitDetailRepository;
+        this.orderDetailRepository = orderDetailRepository;
         this.modelMapper = modelMapper;
+        this.pondRepository = pondRepository;
     }
 
-    public OrderDetailId orderDetailId (Long orderId, Long productId){
-        OrderDetailId orderDetailId = new OrderDetailId();
-        orderDetailId.setOrder(orderRepository.findById(orderId).get());
-        orderDetailId.setProduct(productRepository.findById(productId).get());
-        return orderDetailId;
-    }
-
+    @Override
     public List<OrderDetailDTO> findAll() {
         return createFromEntities(orderDetailRepository.findAll());
     }
 
-    public List<OrderDetailDTO> findAll(Long orderId) {
-        return createFromEntities(orderDetailRepository.findAllByOrderOrderId(orderId));
+    public List<OrderDetailDTO> findAllUnitDetail(Long unitDetailId) {
+        return createFromEntities(orderDetailRepository.findAllByUnitDetail_UnitDetailId(unitDetailId));
     }
 
-    public OrderDetailDTO findById(Long orderId, Long productId) {
-        OrderDetailId orderDetailId = orderDetailId(orderId, productId);
-        Optional <OrderDetail> orderDetails = orderDetailRepository.findById(orderDetailId);
-        orderDetails.orElseThrow(() -> new NotFoundException(orderDetailId));
-        return createFromE(orderDetails.get());
+    public List<OrderDetailDTO> findAllOrderId(Long orderId) {
+        return createFromEntities(orderDetailRepository.findAllByOrder_OrderId(orderId));
     }
 
-    public OrderDetailDTO update(Long orderId, Long productId, OrderDetailDTO orderDetailDTO) {
-        OrderDetailId orderDetailId = orderDetailId(orderId, productId);
-        Optional <OrderDetail> orderDetails = orderDetailRepository.findById(orderDetailId);
-        orderDetails.orElseThrow(() -> new NotFoundException(orderDetailId));
-        orderDetailRepository.save(updateEntity(orderDetails.get(), orderDetailDTO));
-        return createFromE(orderDetails.get());
+    public List<OrderDetailDTO> findAlOrderIdAndUnitDetailId(Long orderId, Long unitDetailId) {
+        return createFromEntities(orderDetailRepository.findAllByOrder_OrderIdAndUnitDetail_UnitDetailId(orderId, unitDetailId));
     }
 
-    public OrderDetailDTO save(OrderDetailDTO orderDetailsDTO) {
-        OrderDetail orderDetail = createFromD(orderDetailsDTO);
-        orderDetailRepository.save(orderDetail);
-        return orderDetailsDTO;
+    @Override
+    public OrderDetailDTO findById(Long orderDetailId) {
+        return createFromE(orderDetailRepository.findById(orderDetailId).get());
     }
 
-    public OrderDetailDTO delete(Long orderId, Long productId) {
-        OrderDetailId orderDetailId = orderDetailId(orderId, productId);
-        Optional <OrderDetail> orderDetails = orderDetailRepository.findById(orderDetailId);
-        orderDetails.orElseThrow(() -> new NotFoundException(orderDetailId));
-        OrderDetailDTO orderDetailDTO = createFromE(orderDetails.get());
-        try {
-            orderDetailRepository.delete(orderDetails.get());
-        }
-        catch (ConstraintViolationException constraintViolationException){
-            throw new ForeignKeyConstraintViolation(OrderDetailDTO.class, orderDetailId);
-        }
+    @Override
+    public OrderDetailDTO update(Long orderDetailId, OrderDetailDTO orderDetailDTO) {
+        OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).get();
+        orderDetailRepository.save(updateEntity(orderDetail, orderDetailDTO));
         return orderDetailDTO;
+    }
+
+    @Override
+    public OrderDetailDTO save(OrderDetailDTO orderDetailDTO) {
+        orderDetailRepository.save(createFromD(orderDetailDTO));
+        return orderDetailDTO;
+    }
+
+    @Override
+    public OrderDetailDTO delete(Long orderDetailId) {
+        OrderDetail orderDetail = orderDetailRepository.findById(orderDetailId).get();
+        try {
+            orderDetailRepository.save(orderDetail);
+        }catch (ConstraintViolationException constraintViolationException){
+            throw new ForeignKeyConstraintViolation(OrderDetail.class, orderDetailId);
+        }
+        return createFromE(orderDetail);
     }
 
     @Override
     public OrderDetail createFromD(OrderDetailDTO orderDetailDTO) {
         OrderDetail orderDetail = modelMapper.map(orderDetailDTO, OrderDetail.class);
-        OrderDetailId orderDetailId = orderDetailId(orderDetailDTO.getOrderId(), orderDetailDTO.getProductId());
-        orderDetail.setOrderDetailId(orderDetailId);
+        orderDetail.setOrder(orderRepository.findById(orderDetailDTO.getOrderId()).get());
+        orderDetail.setUnitDetail(unitDetailRepository.findById(orderDetailDTO.getUnitDetailId()).get());
         return orderDetail;
     }
 
     @Override
     public OrderDetailDTO createFromE(OrderDetail orderDetail) {
         OrderDetailDTO orderDetailDTO = modelMapper.map(orderDetail, OrderDetailDTO.class);
-        orderDetailDTO.setOrderId(orderDetail.getOrderDetailId().getOrder().getOrderId());
-        orderDetailDTO.setProductId(orderDetail.getOrderDetailId().getProduct().getProductId());
+        orderDetailDTO.setOrderId(orderDetail.getOrder().getOrderId());
+        orderDetailDTO.setUnitDetailId(orderDetail.getUnitDetail().getUnitDetailId());
         return orderDetailDTO;
     }
 
     @Override
     public OrderDetail updateEntity(OrderDetail orderDetail, OrderDetailDTO orderDetailDTO) {
         if (orderDetail != null && orderDetailDTO != null){
-            OrderDetailId orderDetailId = orderDetailId(orderDetailDTO.getOrderId(), orderDetailDTO.getProductId());
-            orderDetail.setOrderDetailId(orderDetailId);
             orderDetail.setAmount(orderDetailDTO.getAmount());
         }
         return orderDetail;

@@ -1,4 +1,4 @@
-package n19dccn112.service.Interface;
+package com.n19dccn112.service.Interface;
 
 import java.util.List;
 

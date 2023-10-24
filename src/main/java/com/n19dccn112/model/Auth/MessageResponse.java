@@ -1,4 +1,4 @@
-package n19dccn112.model.Auth;
+package com.n19dccn112.model.Auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
