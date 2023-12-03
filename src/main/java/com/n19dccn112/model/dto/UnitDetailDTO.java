@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,6 @@ public class UnitDetailDTO {
     private float speedGrowth;
     private float length;
     private Integer productPrice;
-    private String unitUnitPrice;
     private Integer unitDetailAmount;
+    private Dictionary<Long, Integer> statusFishIdAmount;
 }

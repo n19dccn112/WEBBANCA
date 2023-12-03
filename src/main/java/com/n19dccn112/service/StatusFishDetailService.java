@@ -2,9 +2,11 @@ package com.n19dccn112.service;
 
 import com.n19dccn112.model.dto.StatusFishDetailDTO;
 import com.n19dccn112.model.entity.StatusFishDetail;
+import com.n19dccn112.model.entity.UpdateDateStatusFishDetail;
 import com.n19dccn112.repository.StatusFishDetailRepository;
 import com.n19dccn112.repository.StatusFishRepository;
 import com.n19dccn112.repository.UnitDetailRepository;
+import com.n19dccn112.repository.UpdateDateStatusFishDetailRepository;
 import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
@@ -12,6 +14,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -19,12 +23,14 @@ public class StatusFishDetailService implements IBaseService<StatusFishDetailDTO
     private final StatusFishDetailRepository statusFishDetailRepository;
     private final StatusFishRepository statusFishRepository;
     private final UnitDetailRepository unitDetailRepository;
+    private final UpdateDateStatusFishDetailRepository updateDateStatusFishDetailRepository;
     private final ModelMapper modelMapper;
 
-    public StatusFishDetailService(StatusFishDetailRepository statusFishDetailRepository, StatusFishRepository statusFishRepository, UnitDetailRepository unitDetailRepository, ModelMapper modelMapper) {
+    public StatusFishDetailService(StatusFishDetailRepository statusFishDetailRepository, StatusFishRepository statusFishRepository, UnitDetailRepository unitDetailRepository, UpdateDateStatusFishDetailRepository updateDateStatusFishDetailRepository, ModelMapper modelMapper) {
         this.statusFishDetailRepository = statusFishDetailRepository;
         this.statusFishRepository = statusFishRepository;
         this.unitDetailRepository = unitDetailRepository;
+        this.updateDateStatusFishDetailRepository = updateDateStatusFishDetailRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -50,13 +56,29 @@ public class StatusFishDetailService implements IBaseService<StatusFishDetailDTO
     @Override
     public StatusFishDetailDTO update(Long statusFishDetailId, StatusFishDetailDTO statusFishDetailDTO) {
         StatusFishDetail statusFishDetail = statusFishDetailRepository.findById(statusFishDetailId).get();
+        int amount = statusFishDetailDTO.getAmount() - statusFishDetail.getAmount();
         statusFishDetailRepository.save(updateEntity(statusFishDetail, statusFishDetailDTO));
+
+        UpdateDateStatusFishDetail updateDateStatusFishDetail = new UpdateDateStatusFishDetail();
+        updateDateStatusFishDetail.setStatusFishDetail(statusFishDetailRepository.findById(statusFishDetailId).get());
+        updateDateStatusFishDetail.setUpdateDate(new Date());
+        updateDateStatusFishDetail.setAmount(amount);
+        updateDateStatusFishDetail.setStatusFishFrom(statusFishDetailRepository.findById(statusFishDetailId).get().getStatusFish());
+        updateDateStatusFishDetailRepository.save(updateDateStatusFishDetail);
         return statusFishDetailDTO;
     }
 
     @Override
     public StatusFishDetailDTO save(StatusFishDetailDTO statusFishDetailDTO) {
+        statusFishDetailDTO.setDateUpdate(new Date());
         statusFishDetailRepository.save(createFromD(statusFishDetailDTO));
+        Long statusFishDetailId = statusFishDetailRepository.statusFishDetailIdNewSave(statusFishDetailDTO.getDateUpdate());
+
+        UpdateDateStatusFishDetail updateDateStatusFishDetail = new UpdateDateStatusFishDetail();
+        updateDateStatusFishDetail.setStatusFishDetail(statusFishDetailRepository.findById(statusFishDetailId).get());
+        updateDateStatusFishDetail.setUpdateDate(new Date());
+        updateDateStatusFishDetail.setAmount(statusFishDetailDTO.getAmount());
+        updateDateStatusFishDetailRepository.save(updateDateStatusFishDetail);
         return statusFishDetailDTO;
     }
 
@@ -90,8 +112,8 @@ public class StatusFishDetailService implements IBaseService<StatusFishDetailDTO
     @Override
     public StatusFishDetail updateEntity(StatusFishDetail statusFishDetail, StatusFishDetailDTO statusFishDetailDTO) {
         if (statusFishDetail != null && statusFishDetailDTO != null){
-            statusFishDetail.setStatusFish(statusFishRepository.findById(statusFishDetailDTO.getUnitDetailId()).get());
-            statusFishDetail.setUnitDetail(unitDetailRepository.findById(statusFishDetailDTO.getStatusFishId()).get());
+            statusFishDetail.setDateUpdate(new Date());
+            statusFishDetail.setAmount(statusFishDetailDTO.getAmount());
         }
         return statusFishDetail;
     }

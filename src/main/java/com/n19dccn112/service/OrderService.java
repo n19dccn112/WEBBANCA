@@ -24,8 +24,10 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
     private final ModelMapper modelMapper;
     private final PondRepository pondRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final StatusFishDetailRepository statusFishDetailRepository;
+    private final StatusFishRepository statusFishRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, OrderStatusRepository orderStatusRepository, PaymentMethodRepository paymentMethodRepository, ModelMapper modelMapper, PondRepository pondRepository, OrderDetailRepository orderDetailRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, OrderStatusRepository orderStatusRepository, PaymentMethodRepository paymentMethodRepository, ModelMapper modelMapper, PondRepository pondRepository, OrderDetailRepository orderDetailRepository, StatusFishDetailRepository statusFishDetailRepository, StatusFishRepository statusFishRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.orderStatusRepository = orderStatusRepository;
@@ -33,6 +35,8 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
         this.modelMapper = modelMapper;
         this.pondRepository = pondRepository;
         this.orderDetailRepository = orderDetailRepository;
+        this.statusFishDetailRepository = statusFishDetailRepository;
+        this.statusFishRepository = statusFishRepository;
     }
 
     @Override
@@ -166,49 +170,45 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
     public Order updateEntity(Order order, OrderDTO orderDTO) {
         if (order != null && orderDTO != null){
             if (orderDTO.getOrderStatusId() != null) {
+
                 Long statusBegin = orderDTO.getOrderStatusId();
-                order.setOrderStatus(orderStatusRepository.findById(statusBegin).get());
+                List<StatusFishDetail> statusFishDetailsNew = new ArrayList<>();
+                List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrder_OrderId(order.getOrderId());
+
                 if (orderDTO.getOrderStatusId() == 2L){
-                    for (OrderDetail orderDetail: orderDetailRepository.findAllByOrder_OrderId(order.getOrderId())) {
-                        List<Pond> ponds = pondRepository.findPond(orderDetail.getUnitDetail().getUnitDetailId());
+                    for (OrderDetail orderDetail: orderDetails) {
+                        StatusFishDetail statusFishDetail = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(orderDetail.getUnitDetail().getUnitDetailId(), 1L).get(0);
                         int amount = orderDetail.getAmount();
-                        List<Integer> indexPonds = new ArrayList<>();
-                        for (int i=0; i < ponds.size(); i++){
-                            System.out.println("1: " + ponds.get(i).getPondAmount());
-                            System.out.println("2: " + amount);
-                            int a = ponds.get(i).getPondAmount() - amount;
-                            System.out.println("if: " + a);
-                            if (ponds.get(i).getPondAmount() - amount < 0 && amount > 0){
-                                amount = amount - ponds.get(i).getPondAmount();
-                                ponds.get(i).setPondAmount(0);
-                                indexPonds.add(i);
-                                System.out.println("amount if: " + amount);
-                            }
-                            else if(amount > 0){
-                                ponds.get(i).setPondAmount(ponds.get(i).getPondAmount() - amount);
-                                amount = 0;
-                                indexPonds.add(i);
-                                System.out.println("amount else: " + amount);
-                            }
-                        }
-                        System.out.println("amount: " + amount);
-                        if (amount != 0){
-                            cancelUpdate = true;
-                            return order;
-                        }
-                        for (Integer index: indexPonds){
-                            pondRepository.save(ponds.get(index));
+                        if (statusFishDetail.getAmount() - amount > 0 && amount > 0){
+                            statusFishDetail.setAmount(statusFishDetail.getAmount() - amount);
+                            if (statusFishDetail.getAmount() < 0)  return order;
+                            statusFishDetailsNew.add(statusFishDetail);
                         }
                     }
+                    statusFishDetailRepository.saveAll(statusFishDetailsNew);
                 }
                 else if (orderDTO.getOrderStatusId() == 5L && statusBegin != 1L){
-                    List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrder_OrderId(order.getOrderId());
                     for (OrderDetail orderDetail: orderDetails) {
-                        Pond pond = pondRepository.findFirstPond(orderDetail.getUnitDetail().getUnitDetailId()).get(0);
-                        pond.setPondAmount(orderDTO.getReAmounts().get(orderDetail.getOrderDetailId()) + pond.getPondAmount());
-                        pondRepository.save(pond);
+                        StatusFishDetail statusFishDetailBenh =  null;
+                        StatusFishDetail statusFishDetailChet =  null;
+                        int amountBenh = 0;
+                        int amountChet = 0;
+                        try {
+                            statusFishDetailBenh = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(orderDetail.getUnitDetail().getUnitDetailId(), 2L).get(0);
+                            amountBenh = orderDTO.getReAmounts().get(orderDetail.getOrderDetailId());
+                            statusFishDetailBenh.setAmount(amountBenh);
+                            statusFishDetailsNew.add(statusFishDetailBenh);
+                        }catch (Exception e){}
+                        try {
+                            statusFishDetailChet = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(orderDetail.getUnitDetail().getUnitDetailId(), 3L).get(0);
+                            amountChet = orderDetail.getAmount() - amountBenh;
+                            statusFishDetailChet.setAmount(amountChet);
+                            statusFishDetailsNew.add(statusFishDetailChet);
+                            statusFishDetailRepository.saveAll(statusFishDetailsNew);
+                        }catch (Exception e){}
                     }
                 }
+                order.setOrderStatus(orderStatusRepository.findById(statusBegin).get());
             }
             if (orderDTO.getOrderId() != null) {
                 order.setUser(userRepository.findById(orderDTO.getOrderId()).get());

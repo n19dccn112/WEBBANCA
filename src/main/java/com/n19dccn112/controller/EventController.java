@@ -27,4 +27,9 @@ public class EventController implements IBaseController<EventDTO, Long, EventSer
         }
         return getService().findAll();
     }
+
+    @GetMapping("/EventWillGoOrHaveGoing")
+    public List<EventDTO> getAll() {
+        return getService().findAllEventWillGoOrHaveGoing();
+    }
 }

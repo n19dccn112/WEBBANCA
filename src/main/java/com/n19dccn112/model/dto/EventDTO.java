@@ -8,6 +8,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,5 +25,5 @@ public class EventDTO {
     @DecimalMax(value = "100")
     private int discountValue;
     private Long eventStatusId;
-    private String isShow;
+    private List<ProductDTO> productDTOS;
 }

@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -18,17 +20,17 @@ public class Pond {
     @Column(name = "POND_ID")
     private Long pondId;
 
-    @Column(name = "POND_NAME")
-    private String pondName;
-
-    @Column(name = "POND_AREA")
-    private Integer pondArea;
-
     @Column(name = "STANDARD_PRICE")
     private Integer standardPrice;
 
     @Column(name = "POND_AMOUNT")
     private Integer pondAmount;
+
+    @Column(name = "INPUT_DATE")
+    private Date inputDate;
+
+    @Column(name = "PRICE_SHIP")
+    private int priceShip;
 
     @ManyToOne
     @JoinColumn(name = "UNIT_DETAIL_ID")

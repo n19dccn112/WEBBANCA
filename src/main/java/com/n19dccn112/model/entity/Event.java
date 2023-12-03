@@ -39,9 +39,6 @@ public class Event {
     @Column(name = "DISCOUNT_VALUE")
     private int discountValue;
 
-    @Column(name = "IS_SHOW_EVENT")
-    private String isShow;
-
     @OneToMany(mappedBy = "event")
     private List<EventProduct> eventProducts;
 

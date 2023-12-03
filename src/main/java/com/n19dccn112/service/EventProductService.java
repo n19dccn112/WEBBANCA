@@ -12,6 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolationException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 @Service
 public class EventProductService implements IBaseService<EventProductDTO, Long>, IModelMapper<EventProductDTO, EventProduct> {
@@ -36,6 +38,15 @@ public class EventProductService implements IBaseService<EventProductDTO, Long>,
         return createFromEntities(eventProductRepository.findAllByProduct_ProductId(productId));
     }
 
+    public List<EventProductDTO> findAllProductIdAndMaxEvent(Long productId) {
+        List<EventProduct> eventProducts = new ArrayList<>();
+        List<EventProduct> eventProducts1 = eventProductRepository.findAllByProduct_ProductIdAndMaxEvent(productId);
+        try {
+            eventProducts.add(eventProducts1.get(0));
+        }catch (Exception e){}
+        return createFromEntities(eventProducts);
+    }
+
     public List<EventProductDTO> findAllEventId(Long eventId) {
         return createFromEntities(eventProductRepository.findAllByEvent_EventId(eventId));
     }
@@ -58,6 +69,8 @@ public class EventProductService implements IBaseService<EventProductDTO, Long>,
 
     @Override
     public EventProductDTO save(EventProductDTO eventProductDTO) {
+        eventProductDTO.setCreateDate(new Date());
+        eventProductDTO.setUpdateDate(new Date());
         eventProductRepository.save(createFromD(eventProductDTO));
         return eventProductDTO;
     }
@@ -84,8 +97,8 @@ public class EventProductService implements IBaseService<EventProductDTO, Long>,
     @Override
     public EventProductDTO createFromE(EventProduct eventProduct) {
         EventProductDTO eventProductDTO = modelMapper.map(eventProduct, EventProductDTO.class);
-        eventProductDTO.setEventId(eventProductDTO.getEventId());
-        eventProductDTO.setProductId(eventProductDTO.getProductId());
+        eventProductDTO.setEventId(eventProduct.getEvent().getEventId());
+        eventProductDTO.setProductId(eventProduct.getProduct().getProductId());
         return eventProductDTO;
     }
 
@@ -94,8 +107,7 @@ public class EventProductService implements IBaseService<EventProductDTO, Long>,
         if (eventProduct != null && eventProductDTO != null){
             eventProduct.setProduct(productRepository.findById(eventProductDTO.getProductId()).get());
             eventProduct.setEvent(eventRepository.findById(eventProductDTO.getEventId()).get());
-            eventProduct.setUpdateDate(eventProductDTO.getUpdateDate());
-            eventProduct.setCreateDate(eventProductDTO.getCreateDate());
+            eventProduct.setUpdateDate(new Date());
         }
         return eventProduct;
     }

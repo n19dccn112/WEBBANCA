@@ -14,4 +14,6 @@ public class CategoryDTO {
     private String categoryDescription;
     private Long categoryTypeId;
     private Integer amountProducts;
+    @NotNull
+    private int dailyPrice;
 }

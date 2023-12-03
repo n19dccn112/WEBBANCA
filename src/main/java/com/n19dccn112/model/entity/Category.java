@@ -26,6 +26,9 @@ public class Category {
     @Column(name = "CATEGORY_DESCRIPTION")
     private String categoryDescription;
 
+    @Column(name = "DAILY_PRICE")
+    private int dailyPrice;
+
     @ManyToOne
     @JoinColumn(name = "CATEGORY_TYPE_ID")
     private CategoryType categoryType;

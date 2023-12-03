@@ -27,7 +27,8 @@ public class EventProductController implements IBaseController<EventProductDTO, 
 
     @GetMapping("")
     public List<EventProductDTO> getAll(@RequestParam(required = false) Long productId, 
-                                        @RequestParam(required = false) Long eventId) {
+                                        @RequestParam(required = false) Long eventId,
+                                        @RequestParam(required = false) Long productIdMaxEvent) {
             if (productId == null && eventId != null){
                 return getService().findAllEventId(eventId);
             }
@@ -36,6 +37,9 @@ public class EventProductController implements IBaseController<EventProductDTO, 
             }
             if (productId != null && eventId != null){
                 return getService().findAllEventIdAndProductId(eventId, productId);
+            }
+            if (productIdMaxEvent != null){
+                return getService().findAllProductIdAndMaxEvent(productIdMaxEvent);
             }
             return getService().findAll();
         }

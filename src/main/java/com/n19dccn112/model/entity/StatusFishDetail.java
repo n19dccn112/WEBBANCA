@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -19,6 +20,12 @@ public class StatusFishDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "STATUS_FISH_DETAIL_ID")
     private Long statusFishDetailId;
+
+    @Column(name = "STATUS_FISH_AMOUNT")
+    private int amount;
+
+    @Column(name = "STATUS_FISH_DATE_UPDATE")
+    private Date dateUpdate;
 
     @ManyToOne
     @JoinColumn(name = "UNIT_DETAIL_ID")

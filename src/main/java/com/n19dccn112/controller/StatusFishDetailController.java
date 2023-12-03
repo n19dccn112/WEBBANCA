@@ -30,7 +30,7 @@ public class StatusFishDetailController implements IBaseController<StatusFishDet
         if (statusFishId != null && unitDetailId == null){
             return getService().findAllByStatusFishId(statusFishId);
         }
-        if (statusFishId != null && unitDetailId != null){
+        if (statusFishId != null){
             return getService().findAllUnitDetailIdAndStatusFishId(unitDetailId, statusFishId);
         }
         return getService().findAll();

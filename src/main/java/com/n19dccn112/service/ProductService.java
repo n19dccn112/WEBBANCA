@@ -223,8 +223,11 @@ public class ProductService implements IBaseService<ProductDTO, Long>, IModelMap
             if (maxPrice < unitDetail.getProductPrice()){
                 maxPrice = unitDetail.getProductPrice();
             }
-            for (Pond pond: pondRepository.findAllByUnitDetail_UnitDetailId(unitDetail.getUnitDetailId())){
-                amountProduct += pond.getPondAmount() != null ? pond.getPondAmount(): 0;
+            try {
+                StatusFishDetail statusFishDetail = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(unitDetail.getUnitDetailId(), 1L).get(0);
+                amountProduct += statusFishDetail.getAmount();
+            }catch (Exception e){
+                amountProduct = 0;
             }
         }
         productDTO.setAmountProduct(amountProduct);

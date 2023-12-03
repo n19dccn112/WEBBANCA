@@ -7,10 +7,10 @@ import java.util.Date;
 
 @Setter
 @Getter
-public class StatusFishDetailDTO {
-    private Long statusFishDetailId;
+public class UpdateDateStatusFishDetailDTO {
+    private Long updateDateStatusFishDetailId;
+    private Date updateDate;
     private Long statusFishId;
-    private Long unitDetailId;
+    private Long statusDetailIdFrom;
     private int amount;
-    private Date dateUpdate;
 }

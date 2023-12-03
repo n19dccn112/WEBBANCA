@@ -30,9 +30,6 @@ public class UnitDetail {
     @Column(name = "PRODUCT_PRICE")
     private Integer productPrice;
 
-    @Column(name = "UNIT_UNIT_PRICE")
-    private String unitUnitPrice;
-
     @ManyToOne
     @JoinColumn(name = "UNIT_ID")
     private Unit unit;

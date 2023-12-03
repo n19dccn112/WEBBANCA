@@ -99,6 +99,7 @@ public class CategoryService implements IBaseService<CategoryDTO, Long>, IModelM
         if (category != null && categoryDTO != null){
             category.setCategoryName(categoryDTO.getCategoryName());
             category.setCategoryDescription(categoryDTO.getCategoryDescription());
+            category.setDailyPrice(categoryDTO.getDailyPrice());
             category.setCategoryType(categoryTypeRepository.findById(categoryDTO.getCategoryTypeId()).get());
         }
         return category;
