@@ -20,13 +20,15 @@ import java.util.List;
 public class PondService implements IBaseService<PondDTO, Long>, IModelMapper<PondDTO, Pond> {
     private final PondRepository pondRepository;
     private final StatusFishDetailRepository statusFishDetailRepository;
+    private final StatusFishDetailService statusFishDetailService;
     private final UnitDetailRepository unitDetailRepository;
     private final StatusFishRepository statusFishRepository;
     private final ModelMapper modelMapper;
 
-    public PondService(PondRepository pondRepository, StatusFishDetailRepository statusFishDetailRepository, UnitDetailRepository unitDetailRepository, StatusFishRepository statusFishRepository, ModelMapper modelMapper) {
+    public PondService(PondRepository pondRepository, StatusFishDetailRepository statusFishDetailRepository, StatusFishDetailService statusFishDetailService, UnitDetailRepository unitDetailRepository, StatusFishRepository statusFishRepository, ModelMapper modelMapper) {
         this.pondRepository = pondRepository;
         this.statusFishDetailRepository = statusFishDetailRepository;
+        this.statusFishDetailService = statusFishDetailService;
         this.unitDetailRepository = unitDetailRepository;
         this.statusFishRepository = statusFishRepository;
         this.modelMapper = modelMapper;
@@ -39,6 +41,10 @@ public class PondService implements IBaseService<PondDTO, Long>, IModelMapper<Po
 
     public List<PondDTO> findAllByUnitDetailId(Long unitDetailId){
         return createFromEntities(pondRepository.findAllByUnitDetail_UnitDetailId(unitDetailId));
+    }
+
+    public PondDTO getPriceStand(PondDTO pondDTO){
+        return pondDTO;
     }
 
     @Override
@@ -55,38 +61,27 @@ public class PondService implements IBaseService<PondDTO, Long>, IModelMapper<Po
 
     @Override
     public PondDTO save(PondDTO pondDTO) {
-        List<Pond> ponds = pondRepository.findAllByUnitDetail_UnitDetailId(pondDTO.getUnitDetailId());
         int sumAmount = pondDTO.getPondAmount();
         int sumPriceShip = pondDTO.getPriceShip();
         int sumPriceStander = pondDTO.getStandardPrice();
-        int sumLife = 0;
-        int sumDeath = 0;
-        int sumDisease = 0;
+        int sumSale = 0;
         try {
-            sumLife = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(pondDTO.getUnitDetailId(), 1L).get(0).getAmount();
-        }catch (Exception e){}
-        try {
-        sumDeath = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(pondDTO.getUnitDetailId(), 2L).get(0).getAmount();
-        }catch (Exception e){}
-        try {
-        sumDisease = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(pondDTO.getUnitDetailId(), 3L).get(0).getAmount();
-        }catch (Exception e){}
-        int sumSale = pondDTO.getPondAmount() - sumDeath - sumDisease - sumLife;
-        int caTonTai = 0;
-        for (Pond pond: ponds){
-            caTonTai = pond.getPondAmount() - sumSale - sumDeath;
+            Pond pond = pondRepository.findPondOld(pondDTO.getUnitDetailId());
+            PondDTO pondDTOOld = createFromE(pond);
+            sumSale = pond.getPondAmount() - pondDTOOld.getBenhAmount() - pondDTOOld.getSongAmount();
+            int caTonTai = 0;
+            caTonTai = pondDTOOld.getSongAmount() + pondDTOOld.getBenhAmount();
             sumAmount += caTonTai;
             float percentRemain = (float) (caTonTai) / pond.getPondAmount();
             int priceShip = Math.round(pond.getPriceShip() * percentRemain / 1000) * 1000;
             sumPriceShip += priceShip;
             int priceStandard = Math.round(pond.getStandardPrice() * percentRemain/ 1000) * 1000;
             sumPriceStander += priceStandard;
-            pond.setPondAmount(sumSale + sumDeath);
+            pond.setPondAmount(sumSale + pondDTOOld.getChetAmount());
             pond.setPriceShip(pond.getPriceShip() - priceShip);
             pond.setStandardPrice(pond.getStandardPrice() - priceStandard);
             pondRepository.save(pond);
-            break;
-        }
+        }catch (Exception e){}
         pondDTO.setPondAmount(sumAmount);
         pondDTO.setPriceShip(sumPriceShip);
         pondDTO.setStandardPrice(sumPriceStander);
@@ -103,7 +98,7 @@ public class PondService implements IBaseService<PondDTO, Long>, IModelMapper<Po
         statusFishDetail.setDateUpdate(new Date());
         int statusAmount = statusFishDetail.getAmount();
         statusFishDetail.setAmount(statusAmount + sumAmount);
-        statusFishDetailRepository.save(statusFishDetail);
+        statusFishDetailService.save(statusFishDetailService.createFromE(statusFishDetail));
         return pondDTO;
     }
 
@@ -128,7 +123,21 @@ public class PondService implements IBaseService<PondDTO, Long>, IModelMapper<Po
     @Override
     public PondDTO createFromE(Pond pond) {
         PondDTO pondDTO = modelMapper.map(pond, PondDTO.class);
+        int amountBenh = 0;
+        int amountChet = 0;
+        int amountSong = 0;
         pondDTO.setUnitDetailId(pond.getUnitDetail().getUnitDetailId());
+        try {
+            amountBenh = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndIdChetOrSong(pond.getUnitDetail().getUnitDetailId(), 2L);
+        }catch (Exception e){}
+        try {
+            amountChet = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndIdChetOrSong(pond.getUnitDetail().getUnitDetailId(), 3L);
+        }catch (Exception e){}
+        try {amountSong = pond.getPondAmount() - amountChet - amountBenh;
+        }catch (Exception e){}
+        pondDTO.setBenhAmount(amountBenh);
+        pondDTO.setChetAmount(amountChet);
+        pondDTO.setSongAmount(amountSong);
         return pondDTO;
     }
 

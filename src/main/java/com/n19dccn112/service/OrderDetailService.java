@@ -1,18 +1,19 @@
 package com.n19dccn112.service;
 
 import com.n19dccn112.model.dto.OrderDetailDTO;
-import com.n19dccn112.model.entity.Order;
-import com.n19dccn112.model.entity.OrderDetail;
-import com.n19dccn112.model.entity.Pond;
+import com.n19dccn112.model.entity.*;
 import com.n19dccn112.repository.*;
 import com.n19dccn112.service.Interface.IBaseService;
 import com.n19dccn112.service.Interface.IModelMapper;
 import com.n19dccn112.service.exception.ForeignKeyConstraintViolation;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class OrderDetailService implements IBaseService<OrderDetailDTO, Long>, IModelMapper<OrderDetailDTO, OrderDetail> {
     private final OrderRepository orderRepository;
@@ -20,13 +21,17 @@ public class OrderDetailService implements IBaseService<OrderDetailDTO, Long>, I
     private final OrderDetailRepository orderDetailRepository;
     private final ModelMapper modelMapper;
     private final PondRepository pondRepository;
+    private final StatusFishDetailRepository statusFishDetailRepository;
+    private final StatusFishDetailService statusFishDetailService;
 
-    public OrderDetailService(OrderRepository orderRepository, UnitDetailRepository unitDetailRepository, OrderDetailRepository orderDetailRepository, ModelMapper modelMapper, PondRepository pondRepository) {
+    public OrderDetailService(OrderRepository orderRepository, UnitDetailRepository unitDetailRepository, OrderDetailRepository orderDetailRepository, ModelMapper modelMapper, PondRepository pondRepository, StatusFishDetailRepository statusFishDetailRepository, StatusFishDetailService statusFishDetailService) {
         this.orderRepository = orderRepository;
         this.unitDetailRepository = unitDetailRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.modelMapper = modelMapper;
         this.pondRepository = pondRepository;
+        this.statusFishDetailRepository = statusFishDetailRepository;
+        this.statusFishDetailService = statusFishDetailService;
     }
 
     @Override
@@ -57,7 +62,6 @@ public class OrderDetailService implements IBaseService<OrderDetailDTO, Long>, I
         orderDetailRepository.save(updateEntity(orderDetail, orderDetailDTO));
         return orderDetailDTO;
     }
-
     @Override
     public OrderDetailDTO save(OrderDetailDTO orderDetailDTO) {
         orderDetailRepository.save(createFromD(orderDetailDTO));

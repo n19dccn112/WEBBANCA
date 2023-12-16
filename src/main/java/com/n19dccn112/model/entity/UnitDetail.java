@@ -47,7 +47,6 @@ public class UnitDetail {
     @OneToMany(mappedBy = "unitDetail")
     private List<StatusFishDetail> statusFishDetails;
 
-    @OneToMany
-    @JoinColumn(name = "unitDetail")
+    @OneToMany(mappedBy = "unitDetail")
     private List<OrderDetail> orderDetails;
 }

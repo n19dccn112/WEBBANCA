@@ -16,4 +16,8 @@ public interface PondRepository extends JpaRepository<Pond, Long> {
 
     @Query(value="SELECT * FROM POND WHERE UNIT_DETAIL_ID = ?1 ", nativeQuery = true)
     List<Pond> findPond(Long unitDetailId);
+
+    @Query(value="SELECT * FROM POND WHERE UNIT_DETAIL_ID = ?1 AND INPUT_DATE = " +
+            "(SELECT MAX(INPUT_DATE) FROM POND WHERE UNIT_DETAIL_ID = ?1 GROUP BY UNIT_DETAIL_ID)", nativeQuery = true)
+    Pond findPondOld(Long unitDetailId);
 }

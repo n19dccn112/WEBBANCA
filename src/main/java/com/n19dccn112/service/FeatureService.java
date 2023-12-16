@@ -34,6 +34,10 @@ public class FeatureService implements IBaseService<FeatureDTO, Long>, IModelMap
         return createFromEntities(featureRepository.findAllByFeatureType_FeatureTypeId(featureTypeId));
     }
 
+    public List<FeatureDTO> findAllProductId(Long productId) {
+        return createFromEntities(featureRepository.findAllByProductId(productId));
+    }
+
     @Override
     public FeatureDTO findById(Long featureId) {
         return createFromE(featureRepository.findById(featureId).get());

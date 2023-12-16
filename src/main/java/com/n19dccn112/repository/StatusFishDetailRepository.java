@@ -15,7 +15,15 @@ public interface StatusFishDetailRepository extends JpaRepository<StatusFishDeta
     List<StatusFishDetail> findAllByStatusFish_StatusFishId(Long statusFishId);
     List<StatusFishDetail> findAllByUnitDetail_UnitDetailId(Long unitDetailId);
     @Query(value = "SELECT STATUS_FISH_DETAIL_ID FROM STATUS_FISH_DETAIL WHERE STATUS_FISH_DETAIL_ID = " +
-            "(SELECT MAX(STATUS_FISH_DETAIL_ID) FROM STATUS_FISH_DETAIL where STATUS_FISH_DATE_UPDATE = ?1);", nativeQuery = true)
-    Long statusFishDetailIdNewSave(Date updateDate);
+            "(SELECT MAX(STATUS_FISH_DETAIL_ID) FROM STATUS_FISH_DETAIL where UNIT_DETAIL_ID = ?1 AND STATUS_FISH_ID = ?2);", nativeQuery = true)
+    Long statusFishDetailIdNewSave(Long unitDetail, Long statusId);
+
+    @Query(value = "SELECT SUM(AMOUNT) " +
+            "FROM UPDATE_DATE_STATUS_FISH_DETAIL a JOIN STATUS_FISH_DETAIL b on a.STATUS_FISH_DETAIL_ID = b.STATUS_FISH_DETAIL_ID " +
+            "WHERE UPDATE_DATE_STATUS_FISH_DETAIL >= " +
+            "(SELECT MAX(INPUT_DATE) FROM POND WHERE UNIT_DETAIL_ID = b.UNIT_DETAIL_ID AND UNIT_DETAIL_ID = ?1 GROUP BY UNIT_DETAIL_ID) " +
+            "and b.STATUS_FISH_ID = ?2", nativeQuery = true)
+    int findAllByUnitDetail_UnitDetailIdAndIdChetOrSong(Long unitDetailId, Long statusFishId);
+
     List<StatusFishDetail> findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(Long unitDetailId, Long statusFishId);
 }

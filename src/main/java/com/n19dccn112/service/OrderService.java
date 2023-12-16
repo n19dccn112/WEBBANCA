@@ -26,8 +26,9 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
     private final OrderDetailRepository orderDetailRepository;
     private final StatusFishDetailRepository statusFishDetailRepository;
     private final StatusFishRepository statusFishRepository;
+    private final StatusFishDetailService statusFishDetailService;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, OrderStatusRepository orderStatusRepository, PaymentMethodRepository paymentMethodRepository, ModelMapper modelMapper, PondRepository pondRepository, OrderDetailRepository orderDetailRepository, StatusFishDetailRepository statusFishDetailRepository, StatusFishRepository statusFishRepository) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, OrderStatusRepository orderStatusRepository, PaymentMethodRepository paymentMethodRepository, ModelMapper modelMapper, PondRepository pondRepository, OrderDetailRepository orderDetailRepository, StatusFishDetailRepository statusFishDetailRepository, StatusFishRepository statusFishRepository, StatusFishDetailService statusFishDetailService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.orderStatusRepository = orderStatusRepository;
@@ -37,6 +38,7 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
         this.orderDetailRepository = orderDetailRepository;
         this.statusFishDetailRepository = statusFishDetailRepository;
         this.statusFishRepository = statusFishRepository;
+        this.statusFishDetailService = statusFishDetailService;
     }
 
     @Override
@@ -173,6 +175,7 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
 
                 Long statusBegin = orderDTO.getOrderStatusId();
                 List<StatusFishDetail> statusFishDetailsNew = new ArrayList<>();
+                List<UpdateDateStatusFishDetail> updateDateStatusFishDetails = new ArrayList<>();
                 List<OrderDetail> orderDetails = orderDetailRepository.findAllByOrder_OrderId(order.getOrderId());
 
                 if (orderDTO.getOrderStatusId() == 2L){
@@ -185,26 +188,26 @@ public class OrderService implements IBaseService<OrderDTO, Long>, IModelMapper<
                             statusFishDetailsNew.add(statusFishDetail);
                         }
                     }
-                    statusFishDetailRepository.saveAll(statusFishDetailsNew);
+                    statusFishDetailService.saveAll(statusFishDetailsNew);
                 }
                 else if (orderDTO.getOrderStatusId() == 5L && statusBegin != 1L){
                     for (OrderDetail orderDetail: orderDetails) {
-                        StatusFishDetail statusFishDetailBenh =  null;
                         StatusFishDetail statusFishDetailChet =  null;
-                        int amountBenh = 0;
+                        StatusFishDetail statusFishDetailSong =  null;
                         int amountChet = 0;
+                        int amountSong = 0;
                         try {
-                            statusFishDetailBenh = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(orderDetail.getUnitDetail().getUnitDetailId(), 2L).get(0);
-                            amountBenh = orderDTO.getReAmounts().get(orderDetail.getOrderDetailId());
-                            statusFishDetailBenh.setAmount(amountBenh);
-                            statusFishDetailsNew.add(statusFishDetailBenh);
+                            statusFishDetailSong = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(orderDetail.getUnitDetail().getUnitDetailId(), 1L).get(0);
+                            amountSong = orderDTO.getReAmounts().get(orderDetail.getOrderDetailId());
+                            statusFishDetailSong.setAmount(statusFishDetailSong.getAmount() + amountSong);
+                            statusFishDetailsNew.add(statusFishDetailSong);
                         }catch (Exception e){}
                         try {
                             statusFishDetailChet = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(orderDetail.getUnitDetail().getUnitDetailId(), 3L).get(0);
-                            amountChet = orderDetail.getAmount() - amountBenh;
-                            statusFishDetailChet.setAmount(amountChet);
+                            amountChet = orderDetail.getAmount() - amountSong;
+                            statusFishDetailChet.setAmount(statusFishDetailChet.getAmount() + amountChet);
                             statusFishDetailsNew.add(statusFishDetailChet);
-                            statusFishDetailRepository.saveAll(statusFishDetailsNew);
+                            statusFishDetailService.saveAll(statusFishDetailsNew);
                         }catch (Exception e){}
                     }
                 }

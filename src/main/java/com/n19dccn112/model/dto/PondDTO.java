@@ -13,7 +13,11 @@ public class PondDTO {
     private Long pondId;
     private Integer standardPrice;
     private Integer pondAmount;
+    private Integer songAmount;
+    private Integer chetAmount;
+    private Integer benhAmount;
     private Date inputDate;
     private int priceShip;
     private Long unitDetailId;
+    private int priceStand;
 }

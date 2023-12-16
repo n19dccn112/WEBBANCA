@@ -72,7 +72,7 @@ public class StatusFishDetailService implements IBaseService<StatusFishDetailDTO
     public StatusFishDetailDTO save(StatusFishDetailDTO statusFishDetailDTO) {
         statusFishDetailDTO.setDateUpdate(new Date());
         statusFishDetailRepository.save(createFromD(statusFishDetailDTO));
-        Long statusFishDetailId = statusFishDetailRepository.statusFishDetailIdNewSave(statusFishDetailDTO.getDateUpdate());
+        Long statusFishDetailId = statusFishDetailRepository.statusFishDetailIdNewSave(statusFishDetailDTO.getUnitDetailId(), statusFishDetailDTO.getStatusFishId());
 
         UpdateDateStatusFishDetail updateDateStatusFishDetail = new UpdateDateStatusFishDetail();
         updateDateStatusFishDetail.setStatusFishDetail(statusFishDetailRepository.findById(statusFishDetailId).get());
@@ -80,6 +80,12 @@ public class StatusFishDetailService implements IBaseService<StatusFishDetailDTO
         updateDateStatusFishDetail.setAmount(statusFishDetailDTO.getAmount());
         updateDateStatusFishDetailRepository.save(updateDateStatusFishDetail);
         return statusFishDetailDTO;
+    }
+
+    public void saveAll(List<StatusFishDetail> statusFishDetails) {
+        for (StatusFishDetail statusFishDetail: statusFishDetails){
+            save(createFromE(statusFishDetail));
+        }
     }
 
     @Override

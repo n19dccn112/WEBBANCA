@@ -19,9 +19,13 @@ public class FeatureController implements IBaseController<FeatureDTO, Long, Feat
     @Getter
     private FeatureService service;
     @GetMapping("")
-    public List<FeatureDTO> getAll(@RequestParam(required = false) Long featureTypeId) {
+    public List<FeatureDTO> getAll(@RequestParam(required = false) Long featureTypeId,
+                                   @RequestParam(required = false) Long productId) {
         if (featureTypeId != null){
             return getService().findAllFeatureTypeId(featureTypeId);
+        }
+        if (productId != null){
+            return getService().findAllProductId(productId);
         }
         return getService().findAll();
     }

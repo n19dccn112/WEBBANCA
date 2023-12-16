@@ -132,6 +132,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/wards/**",
                         "/api/wards**")
                 .permitAll()
+                .antMatchers("/api/orders/shipSuccess","/api/orders/shipCancel")
+                .hasRole("SHIP")
                 .antMatchers(
                         "/api/paymentMethod/**",
                         "/api/paymentMethod**",

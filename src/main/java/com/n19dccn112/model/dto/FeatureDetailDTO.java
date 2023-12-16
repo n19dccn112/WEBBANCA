@@ -12,4 +12,6 @@ public class FeatureDetailDTO {
     private Long unitDetailId;
     private Long featureId;
     private Integer featurePrice;
+    private Integer importance;
+
 }

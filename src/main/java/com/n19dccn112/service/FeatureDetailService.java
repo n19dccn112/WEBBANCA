@@ -1,7 +1,6 @@
 package com.n19dccn112.service;
 
 import com.n19dccn112.model.dto.FeatureDetailDTO;
-import com.n19dccn112.model.dto.FeatureDetailDTO;
 import com.n19dccn112.model.entity.FeatureDetail;
 import com.n19dccn112.repository.FeatureDetailRepository;
 import com.n19dccn112.repository.FeatureRepository;
@@ -80,6 +79,7 @@ public class FeatureDetailService implements IBaseService<FeatureDetailDTO, Long
         FeatureDetail featureDetail = modelMapper.map(featureDetailDTO, FeatureDetail.class);
         featureDetail.setFeature(featureRepository.findById(featureDetailDTO.getFeatureId()).get());
         featureDetail.setUnitDetail(unitDetailRepository.findById(featureDetailDTO.getUnitDetailId()).get());
+        featureDetail.setImportance(featureDetailDTO.getImportance());
         return featureDetail;
     }
 
@@ -88,6 +88,7 @@ public class FeatureDetailService implements IBaseService<FeatureDetailDTO, Long
         FeatureDetailDTO featureDetailDTO = modelMapper.map(featureDetail, FeatureDetailDTO.class);
         featureDetailDTO.setFeatureId(featureDetail.getFeature().getFeatureId());
         featureDetailDTO.setUnitDetailId(featureDetail.getUnitDetail().getUnitDetailId());
+        featureDetailDTO.setImportance(featureDetail.getImportance());
         return featureDetailDTO;
     }
 
@@ -102,6 +103,9 @@ public class FeatureDetailService implements IBaseService<FeatureDetailDTO, Long
             }
             if (featureDetailDTO.getUnitDetailId() != null){
                 featureDetail.setUnitDetail(unitDetailRepository.findById(featureDetailDTO.getUnitDetailId()).get());
+            }
+            if(featureDetailDTO.getImportance() != null) {
+                featureDetail.setImportance(featureDetailDTO.getImportance());
             }
         }
         return featureDetail;

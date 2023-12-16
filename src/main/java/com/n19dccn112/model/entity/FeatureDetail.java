@@ -21,6 +21,9 @@ public class FeatureDetail {
     @Column(name = "FEATURE_PRICE")
     private Integer featurePrice;
 
+    @Column(name = "IMPORTANCE")
+    private Integer importance;
+
     @ManyToOne
     @JoinColumn(name = "FEATURE_ID")
     private Feature feature;

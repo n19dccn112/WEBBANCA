@@ -79,7 +79,14 @@ public class UnitDetailService implements IBaseService<UnitDetailDTO, Long>, IMo
 
     @Override
     public UnitDetailDTO update(Long unitDetailId, UnitDetailDTO unitDetailDTO) {
-        UnitDetail unitDetail = unitDetailRepository.findById(unitDetailId).get();
+        UnitDetail unitDetail = null;
+        try {
+            unitDetail = unitDetailRepository.findById(unitDetailId).get();
+        } catch (Exception e) {
+            save(unitDetailDTO);
+            Optional<UnitDetail> unitDetail1 = unitDetailRepository.findById(unitDetailRepository.userDetailIdNewSave(unitDetailDTO.getUnitId(), unitDetailDTO.getProductId()));
+            unitDetailDTO = createFromE(unitDetail1.get());
+        }
         unitDetailRepository.save(updateEntity(unitDetail, unitDetailDTO));
         return unitDetailDTO;
     }
@@ -153,7 +160,8 @@ public class UnitDetailService implements IBaseService<UnitDetailDTO, Long>, IMo
                     statusFishDetail.setUnitDetail(unitDetailRepository.findById(id).get());
                     statusFishDetail.setAmount(amount);
                     try {
-                        StatusFishDetail statusFishDetailUpdate = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(unitDetailDTO.getUnitDetailId(), id).get(0);statusFishDetailRepository.save(statusFishDetail);
+                        StatusFishDetail statusFishDetailUpdate = statusFishDetailRepository.findAllByUnitDetail_UnitDetailIdAndAndStatusFish_StatusFishId(unitDetailDTO.getUnitDetailId(), id).get(0);
+                        statusFishDetailRepository.save(statusFishDetail);
                         statusFishDetail.setStatusFishDetailId(statusFishDetailUpdate.getStatusFishDetailId());
                     }catch (Exception e){}
                     statusFishDetailRepository.save(statusFishDetail);

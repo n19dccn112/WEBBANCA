@@ -23,6 +23,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             "(SELECT MAX(ORDER_ID) FROM ORDERS where ORDER_PHONE like ?1);", nativeQuery = true)
     Long orderIdNewSave(String phone);
 
-    @Query(value = "select * from ORDERS where PAYMENT_DATE IS NOT NULL and PAYMENT_DATE <= ?1 AND PAYMENT_DATE >= ?2", nativeQuery = true)
+    @Query(value = "select * from ORDERS where PAYMENT_DATE IS NOT NULL and PAYMENT_DATE <= ?1 AND PAYMENT_DATE >= ?2 AND ORDER_STATUS_ID != 5", nativeQuery = true)
     List<Order> bCDT(Date dateFrom, Date dateTo);
 }

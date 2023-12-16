@@ -165,7 +165,7 @@ public class ProductService implements IBaseService<ProductDTO, Long>, IModelMap
             featureDetailRepository.deleteAllByUnitDetail_UnitDetailId(unitDetail.getUnitDetailId());
             statusFishDetailRepository.deleteAllByUnitDetail_UnitDetailId(unitDetail.getUnitDetailId());
         }
-        unitDetailRepository.deleteAllByProduct_ProductId(productId);
+//        unitDetailRepository.deleteAllByProduct_ProductId(productId);
         imageDetailRepository.deleteAllByProduct_ProductId(productId);
         categoryDetailRepository.deleteAllByProduct_ProductId(productId);
         return productDTO;
